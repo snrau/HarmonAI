@@ -1,0 +1,6 @@
+Given_mxl_files/ 		#they were fetched from the repo of autoharmonizer
+Given_mxl_files 
+inputs/							# content is generated 
+inputs  
+outputs/							# content is provided through the flask server connection in this project
+outputs 

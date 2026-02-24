@@ -1,0 +1,22 @@
+# Ignore IDE files
+*.idea
+
+# Ignore svelteKit attempt
+frontend_svelteKit/
+
+node_modules
+
+# AutoHarmonizer related
+autoharmonizer-main.zip
+weights.hdf5
+__pycache__
+
+# the following are additionally in a .gitignore file in the project folder since there were problems with git tracking them anyways
+Given_mxl_files/ 		#they were fetched from the repo of autoharmonizer
+Given_mxl_files #just to remove from list of untracked files
+inputs/							# content is generated 
+inputs  #just to remove from list of untracked files
+outputs/							# content is provided through the flask server connection in this project
+outputs #just to remove from list of untracked files
+stash_potential_inputs/
+stash_potential_inputs
