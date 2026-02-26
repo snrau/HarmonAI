@@ -1,10 +1,13 @@
-<link href="https://unpkg.com/lineupjs/build/LineUpJS.css" rel="stylesheet">
-<!-- <link href="http://127.0.0.1:5000/lineupcss-sourcemap-file" rel="stylesheet"> -->
-<script src="https://unpkg.com/lineupjs/build/LineUpJS.js">
-    import {music, process_harmonizations_for_visualization, smallest_duration_considered} from "../state.svelte.js";
+<script>
+    import {
+        music,
+        process_harmonizations_for_visualization,
+        smallest_duration_considered,
+    } from "../state.svelte.js";
 
     import * as LineUpJS from "lineupjs";
     import * as d3 from "d3";
+    import "../../node_modules/lineupjs/build/LineUpJS.css";
 
     let container;
     //let container2;
@@ -88,7 +91,8 @@
     $effect(() => {
         if (music.harmonizations.length === 0) {
             // inform user that first harmonizations are needed
-            document.getElementById("lineup").innerHTML = "No data available to show in lineup.";
+            document.getElementById("lineup").innerHTML =
+                "No data available to show in lineup.";
         } else {
             //change of innerHTML needs to come before adding lineup for some reason
             document.getElementById("lineup").innerHTML = "";
@@ -97,140 +101,266 @@
             // give the user a default view that is tailored to the data
             // lineup allows the user anyway to modify the representation
             //const lineup2 = LineUpJS.asTaggle(container2, process_harmonizations_for_lineUp(music.harmonizations));
-            const builder = LineUpJS.builder(process_harmonizations_for_visualization(music.harmonizations));
+            const builder = LineUpJS.builder(
+                process_harmonizations_for_visualization(music.harmonizations),
+            );
 
             // prepare for and manually define columns
-            let piece_duration = music.harmonizations[0]["chord_starting_times"][music.harmonizations[0]["chord_starting_times"].length - 1] + music.harmonizations[0]["chord_durations"][music.harmonizations[0]["chord_durations"].length - 1];
-            let total_number_of_timestamps = piece_duration / smallest_duration_considered;
+            let piece_duration =
+                music.harmonizations[0]["chord_starting_times"][
+                    music.harmonizations[0]["chord_starting_times"].length - 1
+                ] +
+                music.harmonizations[0]["chord_durations"][
+                    music.harmonizations[0]["chord_durations"].length - 1
+                ];
+            let total_number_of_timestamps =
+                piece_duration / smallest_duration_considered;
             let timestamps = Array(total_number_of_timestamps);
             for (let i = 0; i < timestamps.length; i++) {
-                timestamps[i] = i * smallest_duration_considered + " Quarter notes from beginning";
+                timestamps[i] =
+                    i * smallest_duration_considered +
+                    " Quarter notes from beginning";
             }
 
-            const binary_color = (v) => v === 1 ? "darkcyan" : '#aaa';
+            const binary_color = (v) => (v === 1 ? "darkcyan" : "#aaa");
 
             const width_single_value = 60;
             const width_progression = 250;
 
             builder
-                .column(LineUpJS.buildNumberColumn('typicality_of_chords_per_chord', [0, 1])
-                    .width(width_progression)
-                    .label("Typical chord transition indication per chord")
-                    .colorMapping(binary_color)
-                    .asArray(timestamps)
-                    .renderer("heatmap")
-                    .htmlSummary("either 0 or 1<br>0 = not part of a typical chord progression<br>1 = part of a typical chord progression")
+                .column(
+                    LineUpJS.buildNumberColumn(
+                        "typicality_of_chords_per_chord",
+                        [0, 1],
+                    )
+                        .width(width_progression)
+                        .label("Typical chord transition indication per chord")
+                        .colorMapping(binary_color)
+                        .asArray(timestamps)
+                        .renderer("heatmap")
+                        .htmlSummary(
+                            "either 0 or 1<br>0 = not part of a typical chord progression<br>1 = part of a typical chord progression",
+                        ),
                 )
-                .column(LineUpJS.buildCategoricalColumn('roman_numerals')
-                    .width(width_single_value)
-                    .label("Roman Numerals (String)")
-                    .renderer("string", "default", "categorical")
-                    .asArray(timestamps)
+                .column(
+                    LineUpJS.buildCategoricalColumn("roman_numerals")
+                        .width(width_single_value)
+                        .label("Roman Numerals (String)")
+                        .renderer("string", "default", "categorical")
+                        .asArray(timestamps),
                 )
-                .column(LineUpJS.buildCategoricalColumn('roman_numerals_reflecting_durations')
-                    .width(width_progression)
-                    .label("Roman Numerals")
-                    .renderer("catheatmap", "catheatmap", "catdistributionbar")
-                    .asArray(timestamps)
+                .column(
+                    LineUpJS.buildCategoricalColumn(
+                        "roman_numerals_reflecting_durations",
+                    )
+                        .width(width_progression)
+                        .label("Roman Numerals")
+                        .renderer(
+                            "catheatmap",
+                            "catheatmap",
+                            "catdistributionbar",
+                        )
+                        .asArray(timestamps),
                 )
-                .column(LineUpJS.buildNumberColumn('typical_chord_progression_coverage', [0, 100])
-                    .width(width_single_value)
-                    .label("Typicality Percentage")
-                    .colorMapping(d3.scaleLinear([0, 1], ["#aaa", "darkcyan"]))
-                    .htmlSummary("in %<br>0% = no typical transition<br>100% = entirely consisting of typical transitions")
+                .column(
+                    LineUpJS.buildNumberColumn(
+                        "typical_chord_progression_coverage",
+                        [0, 100],
+                    )
+                        .width(width_single_value)
+                        .label("Typicality Percentage")
+                        .colorMapping(
+                            d3.scaleLinear([0, 1], ["#aaa", "darkcyan"]),
+                        )
+                        .htmlSummary(
+                            "in %<br>0% = no typical transition<br>100% = entirely consisting of typical transitions",
+                        ),
                 )
-                .column(LineUpJS.buildNumberColumn('chords_bass_note_midi_reflecting_durations')
-                    .width(width_progression)
-                    .renderer("sparkline")
-                    .label("Bass Tones (midi)")
-                    .asArray(timestamps)
+                .column(
+                    LineUpJS.buildNumberColumn(
+                        "chords_bass_note_midi_reflecting_durations",
+                    )
+                        .width(width_progression)
+                        .renderer("sparkline")
+                        .label("Bass Tones (midi)")
+                        .asArray(timestamps),
                 )
-                .column(LineUpJS.buildNumberColumn('chord_durations_reflecting_durations')
-                    .width(width_progression)
-                    .renderer("heatmap")
-                    .label("Chord Durations")
-                    .asArray(timestamps)
-                    .colorMapping(d3.scaleLinear([0, 1], ["white", "darkorange"]))
+                .column(
+                    LineUpJS.buildNumberColumn(
+                        "chord_durations_reflecting_durations",
+                    )
+                        .width(width_progression)
+                        .renderer("heatmap")
+                        .label("Chord Durations")
+                        .asArray(timestamps)
+                        .colorMapping(
+                            d3.scaleLinear([0, 1], ["white", "darkorange"]),
+                        ),
                 )
-                .column(LineUpJS.buildCategoricalColumn('chords_reflecting_durations')
-                    .width(width_progression)
-                    .label("Chords")
-                    .renderer("catheatmap", "catheatmap", "catdistributionbar")
-                    .asArray(timestamps)
+                .column(
+                    LineUpJS.buildCategoricalColumn(
+                        "chords_reflecting_durations",
+                    )
+                        .width(width_progression)
+                        .label("Chords")
+                        .renderer(
+                            "catheatmap",
+                            "catheatmap",
+                            "catdistributionbar",
+                        )
+                        .asArray(timestamps),
                 )
-                .column(LineUpJS.buildNumberColumn('CC', [1, null])
-                    .width(width_single_value)
-                    .label("CC (Chord Coverage)")
-                    .colorMapping(d3.scaleLinear([0, 1], ["lightgrey", "darkgreen"]))
-                    .htmlSummary("Number of differing chords used<br> <br> ")
+                .column(
+                    LineUpJS.buildNumberColumn("CC", [1, null])
+                        .width(width_single_value)
+                        .label("CC (Chord Coverage)")
+                        .colorMapping(
+                            d3.scaleLinear([0, 1], ["lightgrey", "darkgreen"]),
+                        )
+                        .htmlSummary(
+                            "Number of differing chords used<br> <br> ",
+                        ),
                 )
-                .column(LineUpJS.buildNumberColumn('CHE', [0, null])
-                    .width(width_single_value)
-                    .label("CHE (Chord Histogram Entropy)")
-                    .colorMapping(d3.scaleLinear([0, 1], ["lightgrey", "darkgreen"]))
-                    .htmlSummary("0 - if only 1 chord is used<br>Increases when different chords are used")
+                .column(
+                    LineUpJS.buildNumberColumn("CHE", [0, null])
+                        .width(width_single_value)
+                        .label("CHE (Chord Histogram Entropy)")
+                        .colorMapping(
+                            d3.scaleLinear([0, 1], ["lightgrey", "darkgreen"]),
+                        )
+                        .htmlSummary(
+                            "0 - if only 1 chord is used<br>Increases when different chords are used",
+                        ),
                 ) // TODO get domain range, starts at 0 (for all is the same chord)
-                .column(LineUpJS.buildNumberColumn('PCS', [-1, 1])
-                    .width(width_single_value)
-                    .label("PCS average (pitch consonance score)")
-                    .renderer("tick")
-                    .colorMapping(d3.scaleLinear([0, 0.5, 1], ["darkred", "lightgrey", "darkblue"]))
-                    .htmlSummary("negative PCS = overall dissonant relation of melody note and chord<br>positive PCS = overall consonant<br>PCS 0 = same amounts of dissonant and consonant intervals")
+                .column(
+                    LineUpJS.buildNumberColumn("PCS", [-1, 1])
+                        .width(width_single_value)
+                        .label("PCS average (pitch consonance score)")
+                        .renderer("tick")
+                        .colorMapping(
+                            d3.scaleLinear(
+                                [0, 0.5, 1],
+                                ["darkred", "lightgrey", "darkblue"],
+                            ),
+                        )
+                        .htmlSummary(
+                            "negative PCS = overall dissonant relation of melody note and chord<br>positive PCS = overall consonant<br>PCS 0 = same amounts of dissonant and consonant intervals",
+                        ),
                 ) // normalized range, does not depend on number of chord tones
-                .column(LineUpJS.buildNumberColumn('PCS progression (pitch consonance score)', [-1, 1])
-                    .width(width_progression)
-                    .asArray(timestamps)
-                    .colorMapping(d3.scaleLinear([0, 0.5, 1], ["darkred", "white", "darkblue"]))
-                    .htmlSummary("negative PCS = overall dissonant relation of melody note and chord<br>positive PCS = overall consonant<br>PCS 0 = same amounts of dissonant and consonant intervals")
+                .column(
+                    LineUpJS.buildNumberColumn(
+                        "PCS progression (pitch consonance score)",
+                        [-1, 1],
+                    )
+                        .width(width_progression)
+                        .asArray(timestamps)
+                        .colorMapping(
+                            d3.scaleLinear(
+                                [0, 0.5, 1],
+                                ["darkred", "white", "darkblue"],
+                            ),
+                        )
+                        .htmlSummary(
+                            "negative PCS = overall dissonant relation of melody note and chord<br>positive PCS = overall consonant<br>PCS 0 = same amounts of dissonant and consonant intervals",
+                        ),
                 ) // normalized range, does not depend on number of chord tones
-                .column(LineUpJS.buildNumberColumn('MCTD progression (melody tone chord tonal distance)', [0, 3])
-                    .width(width_progression)
-                    .asArray(timestamps)
-                    .colorMapping(d3.scaleLinear([0, 1], ["white", "darkviolet"]))
+                .column(
+                    LineUpJS.buildNumberColumn(
+                        "MCTD progression (melody tone chord tonal distance)",
+                        [0, 3],
+                    )
+                        .width(width_progression)
+                        .asArray(timestamps)
+                        .colorMapping(
+                            d3.scaleLinear([0, 1], ["white", "darkviolet"]),
+                        ),
                 )
-                .column(LineUpJS.buildNumberColumn('MCTD_average', [0, 3])
-                    .width(width_single_value)
-                    .label("MCTD average (melody chord tonal distance)")
-                    .colorMapping(d3.scaleLinear([0, 1], ["lightgrey", "darkviolet"]))
+                .column(
+                    LineUpJS.buildNumberColumn("MCTD_average", [0, 3])
+                        .width(width_single_value)
+                        .label("MCTD average (melody chord tonal distance)")
+                        .colorMapping(
+                            d3.scaleLinear([0, 1], ["lightgrey", "darkviolet"]),
+                        ),
                 )
-                .column(LineUpJS.buildNumberColumn('CTD_average', [0, 2])
-                    .width(width_single_value)
-                    .label("CTD average (chord tonal distance)")
-                    .colorMapping(d3.scaleLinear([0, 1], ["lightgrey", "darkblue"]).unknown("lightgrey"))
+                .column(
+                    LineUpJS.buildNumberColumn("CTD_average", [0, 2])
+                        .width(width_single_value)
+                        .label("CTD average (chord tonal distance)")
+                        .colorMapping(
+                            d3
+                                .scaleLinear([0, 1], ["lightgrey", "darkblue"])
+                                .unknown("lightgrey"),
+                        ),
                 ) // 0 for same chords, the bigger the value the bigger the change
-                .column(LineUpJS.buildNumberColumn('CTD per chord (chord tonal distance)', [0, 2])
-                    .width(width_progression)
-                    .asArray(timestamps)
-                    .colorMapping(d3.scaleLinear([0, 1], ["#ccc", "darkblue"]).unknown("lightgrey"))
-                    .htmlSummary("Tonal distance of a chord to its previous chord<br>First chord has no previous chord, therefore no CTD value as well<br>Chord beginnings are highlighted by a CTD value of 2")
+                .column(
+                    LineUpJS.buildNumberColumn(
+                        "CTD per chord (chord tonal distance)",
+                        [0, 2],
+                    )
+                        .width(width_progression)
+                        .asArray(timestamps)
+                        .colorMapping(
+                            d3
+                                .scaleLinear([0, 1], ["#ccc", "darkblue"])
+                                .unknown("lightgrey"),
+                        )
+                        .htmlSummary(
+                            "Tonal distance of a chord to its previous chord<br>First chord has no previous chord, therefore no CTD value as well<br>Chord beginnings are highlighted by a CTD value of 2",
+                        ),
                 )
 
-                .column(LineUpJS.buildNumberColumn('CT class progression (chord tone)', [0, 1])
-                    .width(width_progression)
-                    .asArray(timestamps)
-                    .renderer("heatmap", "default", "histogram")
-                    .colorMapping(d3.scaleLinear([0, 0.5, 1], ["darkblue", "darkorange", "darkred"]))
-                    .htmlSummary("blue = chord tone<br> orange = proper non chord tone (kind of accepted non chord tone)<br> red = non chord tone")
-                    .description("0 = chord tone; 0.5 = proper non chord tone (kind of accepted non chord tone); 1 = non chord tone")
+                .column(
+                    LineUpJS.buildNumberColumn(
+                        "CT class progression (chord tone)",
+                        [0, 1],
+                    )
+                        .width(width_progression)
+                        .asArray(timestamps)
+                        .renderer("heatmap", "default", "histogram")
+                        .colorMapping(
+                            d3.scaleLinear(
+                                [0, 0.5, 1],
+                                ["darkblue", "darkorange", "darkred"],
+                            ),
+                        )
+                        .htmlSummary(
+                            "blue = chord tone<br> orange = proper non chord tone (kind of accepted non chord tone)<br> red = non chord tone",
+                        )
+                        .description(
+                            "0 = chord tone; 0.5 = proper non chord tone (kind of accepted non chord tone); 1 = non chord tone",
+                        ),
                 )
                 //.column(LineUpJS.buildCategoricalColumn("CT class progression (chord tone) (string labels)").categories(["chord_tone", "non_chord_tone", "proper_non_chord_tone"]).asArray(timestamps))
                 //.column(LineUpJS.buildCategoricalColumn('CT class progression (chord tone) (string labels)').asArray(timestamps).color('schemeCategory10').width(200)) // TODO probably not display it
-                .column(LineUpJS.buildNumberColumn('CTnCTR', [0, 1])
-                    .width(width_single_value)
-                    .renderer("tick")
-                    .label("CTnCTR (chord tone to non chord tone ratio)")
-                    .colorMapping(d3.scaleLinear([0, 0.5, 1], ["darkred", "lightgrey", "darkblue"]))
-                    .htmlSummary("0 = red = only non chord tones<br> 1 = blue = only chord tones (or at least proper non chord tones)<br> ")
+                .column(
+                    LineUpJS.buildNumberColumn("CTnCTR", [0, 1])
+                        .width(width_single_value)
+                        .renderer("tick")
+                        .label("CTnCTR (chord tone to non chord tone ratio)")
+                        .colorMapping(
+                            d3.scaleLinear(
+                                [0, 0.5, 1],
+                                ["darkred", "lightgrey", "darkblue"],
+                            ),
+                        )
+                        .htmlSummary(
+                            "0 = red = only non chord tones<br> 1 = blue = only chord tones (or at least proper non chord tones)<br> ",
+                        ),
                 ) // range [0,1], 0 is only non-chord-tones, 1 is only chord-tones, or proper-non-chord-tones (proper in the sense of accepted non-chord-tones, because they are positively interesting)
 
-                .column(LineUpJS.buildCategoricalColumn('AI_Model')
-                    .label('AI model')
-                    .width(width_single_value)
+                .column(
+                    LineUpJS.buildCategoricalColumn("AI_Model")
+                        .label("AI model")
+                        .width(width_single_value),
                 )
-                .column(LineUpJS.buildNumberColumn('rythm_density', [0, 1])
-                    .width(width_single_value)
-                    .label("Rhythm Density")
-                    .colorMapping(d3.scaleLinear([0, 1], ["lightgrey", "darkblue"]))
+                .column(
+                    LineUpJS.buildNumberColumn("rythm_density", [0, 1])
+                        .width(width_single_value)
+                        .label("Rhythm Density")
+                        .colorMapping(
+                            d3.scaleLinear([0, 1], ["lightgrey", "darkblue"]),
+                        ),
                 );
 
             // add all attributes within the provided data automatically and assign colors as well
@@ -278,7 +408,6 @@
             // tick: new TickCellRenderer(),
             // cattick: new CategoricalTickCellRenderer(),
 
-
             // add tailored rankings that are a good start into analysis
             // TODO first ranking without the progression versions due to first overview, and progressions have a lot more details already?
             const ranking_metrics_of_yeh = LineUpJS.buildRanking()
@@ -294,7 +423,7 @@
                 .column("CTD per chord (chord tonal distance)")
                 .column("CC (Chord Coverage)")
                 .column("CHE (Chord Histogram Entropy)")
-                .column("Chords")
+                .column("Chords");
 
             const small_ranking = LineUpJS.buildRanking()
                 .rank()
@@ -304,7 +433,7 @@
                 .column("MCTD progression (melody tone chord tonal distance)")
                 .column("CTD per chord (chord tonal distance)")
                 .column("Typical chord transition indication per chord")
-                .column("Bass Tones (midi)")
+                .column("Bass Tones (midi)");
 
             const functional_analysis = LineUpJS.buildRanking()
                 .rank()
@@ -315,8 +444,7 @@
                 .column("Roman Numerals")
                 .column("Typicality Percentage")
                 .column("Typical chord transition indication per chord")
-                .column("Bass Tones (midi)")
-
+                .column("Bass Tones (midi)");
 
             builder
                 .ranking(functional_analysis)
@@ -326,23 +454,24 @@
 
             builder.overviewMode(); // use that mode initially, to follow paradigm: overview first, zoom and filter, details on demand
             lineUp = builder.buildTaggle(container); // when using Taggle, there is an overview option that comes in handy for more samples than can fit in the screen
-            lineUp.on("selectionChanged", selectionChangedListener)
+            lineUp.on("selectionChanged", selectionChangedListener);
             lineUp.on("highlightChanged", (dataIndex) => {
                 music.highlighted_harmonization_index = dataIndex;
                 if (dataIndex !== -1) {
                     // if a row is highlighted
-                    music.highlighted_harmonization = music.harmonizations[dataIndex];
+                    music.highlighted_harmonization =
+                        music.harmonizations[dataIndex];
                 } else {
                     // nothing is highlighted
                     music.highlighted_harmonization = {};
                 }
-            })
+            });
         }
     });
 
     function selectionChangedListener(selection) {
         selection.sort((a, b) => {
-            return a - b
+            return a - b;
         });
         music.selected_harmonizations_indeces = selection;
         music.selected_harmonizations = []; // get rid of not anymore selected
@@ -352,12 +481,9 @@
     }
 </script>
 
-
-<div id="lineup" class="lineup" bind:this={container}>No data available to show in lineup.</div>
-<!--
-<h2>LineUp 2</h2>
-<div id="lineup2" class="lineup" bind:this={container2}>No data available to show in lineup.</div>
--->
+<div id="lineup" class="lineup" bind:this={container}>
+    No data available to show in lineup.
+</div>
 
 <style>
     /* width and height setting needed to get lineup to show up properly */
@@ -366,4 +492,3 @@
         height: 100%;
     }
 </style>
-

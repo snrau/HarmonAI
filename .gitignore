@@ -11,6 +11,10 @@ autoharmonizer-main.zip
 weights.hdf5
 __pycache__
 
+aivenv
+
+cvenv
+
 # the following are additionally in a .gitignore file in the project folder since there were problems with git tracking them anyways
 Given_mxl_files/ 		#they were fetched from the repo of autoharmonizer
 Given_mxl_files #just to remove from list of untracked files

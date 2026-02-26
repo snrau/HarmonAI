@@ -95,7 +95,7 @@ def watermark(score, filename, water_mark=WATER_MARK):
         
         score.metadata = metadata.Metadata()
         score.metadata.title = filename
-        score.metadata.composer = 'harmonized by AutoHarmonizer'
+        score.metadata.composer = 'AI harmonized'
     
     return score
 

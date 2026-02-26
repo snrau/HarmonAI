@@ -1,4 +1,5 @@
 import os
+#os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 import math
 import pickle
 import numpy as np
@@ -273,6 +274,8 @@ def build_model(segment_length, rnn_size, num_layers, dropout, weights_path=None
 
     else:
         model.load_weights(weights_path)
+
+    model.save('converted_model')
 
     return model
 

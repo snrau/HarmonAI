@@ -1,8 +1,8 @@
 #Python==3.7.9
-Keras==2.3.0
-keras-metrics==1.1.0
-tensorflow-gpu==2.2.0
+Keras
+keras-metrics
+tensorflow-gpu==2.10.0
 music21==6.7.1
 tqdm==4.62.3
 samplings==0.1.7
-protobuf==3.20.0
+protobuf

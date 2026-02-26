@@ -9,12 +9,12 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^6.0.0",
     "svelte": "^5.35.5",
-    "vite": "^7.0.4"
+    "vite": "^5.4.21"
   },
   "dependencies": {
+    "@sveltejs/vite-plugin-svelte": "^4.0.2",
     "d3": "^7.9.0",
-    "lineupjs": "^4.14.1"
+    "lineupjs": "^4.12.2"
   }
 }

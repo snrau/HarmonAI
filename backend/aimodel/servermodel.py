@@ -6,6 +6,8 @@ from harmonizer import *
 
 app = Flask(__name__)
 
+# Build harmonic rhythm and chord model
+model = build_model(SEGMENT_LENGTH, RNN_SIZE, NUM_LAYERS, DROPOUT, WEIGHTS_PATH, training=False)
 
 # put this sippet ahead of all your blueprints
 # blueprint can also be app~~
@@ -33,9 +35,7 @@ def get_harmonizations():
     # Load data from 'inputs'
     filenames = get_filenames(input_dir=INPUTS_PATH)
     data_corpus = convert_files(filenames, fromDataset=False)
-
-    # Build harmonic rhythm and chord model
-    model = build_model(SEGMENT_LENGTH, RNN_SIZE, NUM_LAYERS, DROPOUT, WEIGHTS_PATH, training=False)
+    
 
     # Process each melody sequence
     for idx in trange(len(data_corpus)):
@@ -79,10 +79,6 @@ def get_harmonizations():
 def get_existing_harmonizations():
     return jsonify(construct_harmonies_table(get_filenames(input_dir=OUTPUTS_PATH)))
 
-
-@app.route("/static_test_Data_from_file")
-def test2():
-    return flask.send_file("E:/Users/Verena/Documents/Studium/Master/Thesis/Code/Test_datensatz_LineUp.json")
 
 
 if __name__ == "__main__":

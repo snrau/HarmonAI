@@ -39,19 +39,19 @@ def test():
 @app.route("/lineupjs-sourcemap-file")
 def provide_lineupjs_sourcemap_file():
     return flask.send_file(
-        "E:/Users/Verena/Documents/Studium/Master/Thesis/Code/HarmonAI/backend/lineup_sourcemap_files/LineUpJS.js")
+        "./lineup_sourcemap_files/LineUpJS.js")
 
 
 @app.route("/lineupcss-sourcemap-file")
 def provide_lineupcss_sourcemap_file():
     return flask.send_file(
-        "E:/Users/Verena/Documents/Studium/Master/Thesis/Code/HarmonAI/backend/lineup_sourcemap_files/LineUpJS.css")
+        "./lineup_sourcemap_files/LineUpJS.css")
 
 
 # Path for all the static files (compiled JS/CSS, etc.)
 @app.route("/<path:path>")
 def home(path):
-    return send_from_directory('../fronted_svelte/harmonAI/public', path)
+    return send_from_directory('../../fronted/public', path)
 
 
 @app.route("/rand/")
@@ -62,7 +62,7 @@ def hello():
 @app.route("/melody")
 def getMelody():
     # TODO implement better solution than "somewhere hidden in the code" hardwire local file paths...
-    melody = get_melody_from_mxl("E:/Users/Verena/Documents/Studium/Master/Thesis/Code/HarmonAI/input_melody/",
+    melody = get_melody_from_mxl("../../input/",
                                  "brahms_inspired_transposed_to_some_sharps.mxl")
     return jsonify(melody)
 
