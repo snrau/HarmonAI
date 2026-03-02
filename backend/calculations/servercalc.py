@@ -1,10 +1,11 @@
 import os.path
 
 import flask
-from flask import Flask, send_from_directory, jsonify, request
+from flask import Flask, send_from_directory, jsonify, request, Response
 import random
 
-from converter import json_to_music21, get_melody_from_mxl
+
+from converter import json_to_music21, get_melody_from_mxl, score_to_musicxml_string
 from metrics_management import calculate_metrics, get_note_ranges
 from variations_within_chords import generate_variations_within_chords
 
@@ -25,33 +26,16 @@ def after_request(response):
     return response
 
 
-# Path for our main Svelte page
-@app.route("/")
-def base():
-    return send_from_directory('/', 'Test_datensatz_LineUp.json')
-
-
 @app.route("/static_test_Data_from_code")
 def test():
     return flask.jsonify([["label1", "label2"], [1, 2], [[1, 1, 1], [2, 2, 2]]])
 
 
-@app.route("/lineupjs-sourcemap-file")
-def provide_lineupjs_sourcemap_file():
-    return flask.send_file(
-        "./lineup_sourcemap_files/LineUpJS.js")
-
-
-@app.route("/lineupcss-sourcemap-file")
-def provide_lineupcss_sourcemap_file():
-    return flask.send_file(
-        "./lineup_sourcemap_files/LineUpJS.css")
-
 
 # Path for all the static files (compiled JS/CSS, etc.)
 @app.route("/<path:path>")
 def home(path):
-    return send_from_directory('../../fronted/public', path)
+    return send_from_directory('../../jsapp/public', path)
 
 
 @app.route("/rand/")
@@ -74,9 +58,16 @@ def saveHarmonizations():
     music_data_json["harmonizations"] = request.json["harmonizations"]
     score = json_to_music21(music_data_json)
 
-    score.write('mxl', fp=os.path.join(request.json["path"], request.json["filename"]))
+    xml_string = score_to_musicxml_string(score)
 
-    return jsonify({"status": 201})
+    #return jsonify({"status": 201})
+    return Response(
+        xml_string,
+        mimetype="application/vnd.recordare.musicxml+xml",
+        headers={
+            "Content-Disposition": "attachment; filename=score.musicxml"
+        }
+    )
 
 
 @app.route("/metrics", methods=['POST'])

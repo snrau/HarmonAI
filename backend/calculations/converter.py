@@ -2,6 +2,13 @@ import os
 from music21 import *
 
 
+
+def score_to_musicxml_string(score):
+    exporter = musicxml.m21ToXml.GeneralObjectExporter(score)
+    xml_bytes = exporter.parse()
+    xml_string = xml_bytes.decode("utf-8")
+    return xml_string
+
 def json_to_music21(music_json):
     #  build it bottom up:
     # loop through json, create music21 objects from the data items, collect the items in lists, to create next layer

@@ -88,6 +88,10 @@
     //     return processed_harmonizations;
     // }
 
+    const processed = $derived.by(() => {
+        return process_harmonizations_for_visualization(music.harmonizations);
+    });
+
     $effect(() => {
         if (music.harmonizations.length === 0) {
             // inform user that first harmonizations are needed
@@ -101,9 +105,7 @@
             // give the user a default view that is tailored to the data
             // lineup allows the user anyway to modify the representation
             //const lineup2 = LineUpJS.asTaggle(container2, process_harmonizations_for_lineUp(music.harmonizations));
-            const builder = LineUpJS.builder(
-                process_harmonizations_for_visualization(music.harmonizations),
-            );
+            const builder = LineUpJS.builder(processed);
 
             // prepare for and manually define columns
             let piece_duration =
@@ -347,8 +349,9 @@
                         .htmlSummary(
                             "0 = red = only non chord tones<br> 1 = blue = only chord tones (or at least proper non chord tones)<br> ",
                         ),
-                ) // range [0,1], 0 is only non-chord-tones, 1 is only chord-tones, or proper-non-chord-tones (proper in the sense of accepted non-chord-tones, because they are positively interesting)
+                ); // range [0,1], 0 is only non-chord-tones, 1 is only chord-tones, or proper-non-chord-tones (proper in the sense of accepted non-chord-tones, because they are positively interesting)
 
+            /*
                 .column(
                     LineUpJS.buildCategoricalColumn("AI_Model")
                         .label("AI model")
@@ -362,6 +365,7 @@
                             d3.scaleLinear([0, 1], ["lightgrey", "darkblue"]),
                         ),
                 );
+                */
 
             // add all attributes within the provided data automatically and assign colors as well
             // do this to allow the user access to all data, even if it is not prepared to be displayed
