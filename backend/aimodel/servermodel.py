@@ -37,6 +37,7 @@ def get_harmonizations():
     data_corpus = convert_files(filenames, fromDataset=False)
     
 
+    seen = set()
     # Process each melody sequence
     for idx in trange(len(data_corpus)):
         melody_data = data_corpus[idx][0]
@@ -45,31 +46,28 @@ def get_harmonizations():
         score = data_corpus[idx][3]
         filename = data_corpus[idx][4]
 
+        densities = (
+        list(range(int(rhythm_density_lower_bound * 100), int(rhythm_density_upper_bound * 100) + 1, 1))
+        + list(range(0, int(rhythm_density_lower_bound * 100) + 1, 5))
+    )
+
         # values for rhythm_density can be between 0 and 1
-        for rythm_density in range(int(rhythm_density_lower_bound * 100), int(rhythm_density_upper_bound * 100) + 1, 1):
-            # calculating back and forth with 100 is due to range() working only on integers
-            rythm_density /= 100
-            print(rythm_density)
-            # Generate harmonic rhythm and chord data
-            chord_data = generate_chord(model, melody_data, beat_data, key_data, rhythm_gamma=rythm_density)
+        for density in densities:
+            rythm_density = density / 100
 
-            # Export music file
-            print(filename)
-            filename_extended = filename[:-4] + "_variant_" + str(rythm_density) + ".mxl"
-            print(filename_extended)
-            export_music(score, beat_data, chord_data, filename_extended)
+            chord_data = generate_chord(
+                model, melody_data, beat_data, key_data, rhythm_gamma=rythm_density
+            )
 
-        for rythm_density in range(int(0.25 * 100), int(0.7 * 100) + 1, 5):
-            # calculating back and forth with 100 is due to range() working only on integers
-            rythm_density /= 100
-            print(rythm_density)
-            # Generate harmonic rhythm and chord data
-            chord_data = generate_chord(model, melody_data, beat_data, key_data, rhythm_gamma=rythm_density)
+            # convert to hashable representation
+            chord_key = tuple(chord_data)
 
-            # Export music file
-            print(filename)
-            filename_extended = filename[:-4] + "_variant_" + str(rythm_density) + ".mxl"
-            print(filename_extended)
+            if chord_key in seen:
+                continue
+
+            seen.add(chord_key)
+
+            filename_extended = filename[:-4] + f"_variant_{rythm_density}.mxl"
             export_music(score, beat_data, chord_data, filename_extended)
 
     return jsonify(construct_harmonies_table(get_filenames(input_dir=OUTPUTS_PATH)))

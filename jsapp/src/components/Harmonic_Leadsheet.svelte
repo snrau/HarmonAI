@@ -7,7 +7,6 @@
     let width = $derived(properties.data.width);
     let heightpercent = $derived(properties.data.height);
     const height = window.innerHeight * (parseFloat(heightpercent) / 100) - 1;
-    console.log(height, heightpercent);
     let coloring_melody = $derived(properties.data.coloring_melody);
     let coloring_harmonization = $derived(
         properties.data.coloring_harmonization,

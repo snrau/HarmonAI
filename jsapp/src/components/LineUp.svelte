@@ -5,6 +5,8 @@
         smallest_duration_considered,
     } from "../state.svelte.js";
 
+    import { playHarmonization } from "../helper/musicutil.js";
+
     import * as LineUpJS from "lineupjs";
     import * as d3 from "d3";
     import "../../node_modules/lineupjs/build/LineUpJS.css";
@@ -14,79 +16,38 @@
 
     let lineUp;
 
-    //const smallest_duration_considered = 0.25; // should be 1/16 note duration, based on a quarter note length that is 1.
-    //
-    // function process_harmonizations_for_lineUp(harmonizations) {
-    //     let processed_harmonizations = [];
-    //
-    //     for (let harmonization of harmonizations) {
-    //         let processed_harmonization = {};
-    //         // in the following add attributes that need processing for useful visual representation in lineup
-    //
-    //         let MCTD_progression = [];
-    //         let CT_class_progression = [];
-    //         let CT_class_progression_string = [];
-    //         let PCS_progression = [];
-    //         let CT_class_as_numerical_value = {
-    //             "chord_tone": 0,
-    //             "non_chord_tone": 0.7,
-    //             "proper_non_chord_tone": 1,
-    //         }
-    //         // encode durations as well
-    //         // consider each pair of melody tone and corresponding chord, this is not just the number of chords or melody notes
-    //         for (let i = 0; i < harmonization["MCTD_progression"].length; i++) {
-    //             let number_of_needed_duplicates = (harmonization["MCTD_progression"][i]["end"] - harmonization["MCTD_progression"][i]["start"]) / smallest_duration_considered;
-    //             for (let j = 0; j < number_of_needed_duplicates; j++) {
-    //                 MCTD_progression.push(harmonization["MCTD_progression"][i]["MCTD"]);
-    //                 CT_class_progression.push(CT_class_as_numerical_value[harmonization["CT_class_progression"][i]["class"]]);
-    //                 CT_class_progression_string.push(harmonization["CT_class_progression"][i]["class"]);
-    //                 PCS_progression.push(harmonization["PCS_progression"][i]["score"]);
-    //             }
-    //         }
-    //         processed_harmonization["MCTD progression (melody tone chord tonal distance)"] = MCTD_progression;
-    //         processed_harmonization["CT class progression (chord tone)"] = CT_class_progression;
-    //         processed_harmonization["CT class progression (chord tone) (string labels)"] = CT_class_progression_string;
-    //         processed_harmonization["PCS progression (pitch consonance score)"] = PCS_progression;
-    //
-    //         //reflect chord durations as well
-    //         // oriented on the number of chords in the respective harmonization
-    //         let chords = [];
-    //         let chord_durations = [];
-    //         let bass_notes_midi = [];
-    //         let typicality_of_chords = [];
-    //         let CTDs = [];
-    //         for (let i = 0; i < harmonization["chord_symbols"].length; i++) {
-    //             let number_of_needed_duplicates = harmonization["chord_durations"][i] / smallest_duration_considered;
-    //             for (let j = 0; j < number_of_needed_duplicates; j++) {
-    //                 chords.push(harmonization["chord_symbols"][i]);
-    //                 chord_durations.push(harmonization["chord_durations"][i]);
-    //                 bass_notes_midi.push(harmonization["chords_bass_note_midi"][i]);
-    //                 typicality_of_chords.push(harmonization["typical_chord_progression_coverage_per_chord"][i]);
-    //                 if (j === number_of_needed_duplicates - 1 && harmonization["CTD_per_chord"][i]) {
-    //                     CTDs.push(2); // to highlight chord beginnings visually
-    //                 } else {
-    //                     CTDs.push(harmonization["CTD_per_chord"][i]);
-    //                 }
-    //             }
-    //         }
-    //         processed_harmonization["chords_reflecting_durations"] = chords;
-    //         processed_harmonization["chord_durations_reflecting_durations"] = chord_durations;
-    //         processed_harmonization["chords_bass_note_midi_reflecting_durations"] = bass_notes_midi;
-    //         processed_harmonization["typicality_of_chords_per_chord"] = typicality_of_chords;
-    //         processed_harmonization["CTD per chord (chord tonal distance)"] = CTDs;
-    //
-    //         // keep all data available but implement default selection of columns that seem most useful and others the user can add manually if wanted?
-    //         // ai model specific attributes (as e.g. rhythm density) of harmonizers added in the future could not be considered here, only if all attributes are kept and manual pre-selection of columns is done
-    //         for (let key in harmonization) {
-    //             processed_harmonization[key] = harmonization[key]; // add all attributes unchanged
-    //         }
-    //
-    //         processed_harmonizations.push(processed_harmonization);
-    //     }
-    //
-    //     //music.harmonizations = processed_harmonizations; // DONT DO THAT, it leads to a probably infinite loop of updating harmonizations
-    //     return processed_harmonizations;
-    // }
+    const KEYS = [
+        "C major",
+        "G major",
+        "D major",
+        "A major",
+        "E major",
+        "B major",
+        "F# major",
+        "C# major",
+        "F major",
+        "Bb major",
+        "Eb major",
+        "Ab major",
+        "Db major",
+        "Gb major",
+        "Cb major",
+        "A minor",
+        "E minor",
+        "B minor",
+        "F# minor",
+        "C# minor",
+        "G# minor",
+        "D# minor",
+        "A# minor",
+        "D minor",
+        "G minor",
+        "C minor",
+        "F minor",
+        "Bb minor",
+        "Eb minor",
+        "Ab minor",
+    ];
 
     const processed = $derived.by(() => {
         return process_harmonizations_for_visualization(music.harmonizations);
@@ -174,8 +135,10 @@
                         .colorMapping(
                             d3.scaleLinear([0, 1], ["#aaa", "darkcyan"]),
                         )
+                        .numberFormat(d3.format("d"))
+                        .renderer("number", "default", "violin")
                         .htmlSummary(
-                            "in %<br>0% = no typical transition<br>100% = entirely consisting of typical transitions",
+                            "0 = no typical transition; 100% = entirely consisting of typical transitions",
                         ),
                 )
                 .column(
@@ -216,6 +179,8 @@
                     LineUpJS.buildNumberColumn("CC", [1, null])
                         .width(width_single_value)
                         .label("CC (Chord Coverage)")
+                        .renderer("number")
+                        .numberFormat(d3.format("d"))
                         .colorMapping(
                             d3.scaleLinear([0, 1], ["lightgrey", "darkgreen"]),
                         )
@@ -227,6 +192,7 @@
                     LineUpJS.buildNumberColumn("CHE", [0, null])
                         .width(width_single_value)
                         .label("CHE (Chord Histogram Entropy)")
+                        .renderer("dot")
                         .colorMapping(
                             d3.scaleLinear([0, 1], ["lightgrey", "darkgreen"]),
                         )
@@ -238,7 +204,7 @@
                     LineUpJS.buildNumberColumn("PCS", [-1, 1])
                         .width(width_single_value)
                         .label("PCS average (pitch consonance score)")
-                        .renderer("tick")
+                        .renderer("dot")
                         .colorMapping(
                             d3.scaleLinear(
                                 [0, 0.5, 1],
@@ -281,6 +247,7 @@
                     LineUpJS.buildNumberColumn("MCTD_average", [0, 3])
                         .width(width_single_value)
                         .label("MCTD average (melody chord tonal distance)")
+                        .renderer("dot")
                         .colorMapping(
                             d3.scaleLinear([0, 1], ["lightgrey", "darkviolet"]),
                         ),
@@ -289,6 +256,7 @@
                     LineUpJS.buildNumberColumn("CTD_average", [0, 2])
                         .width(width_single_value)
                         .label("CTD average (chord tonal distance)")
+                        .renderer("dot")
                         .colorMapping(
                             d3
                                 .scaleLinear([0, 1], ["lightgrey", "darkblue"])
@@ -311,7 +279,6 @@
                             "Tonal distance of a chord to its previous chord<br>First chord has no previous chord, therefore no CTD value as well<br>Chord beginnings are highlighted by a CTD value of 2",
                         ),
                 )
-
                 .column(
                     LineUpJS.buildNumberColumn(
                         "CT class progression (chord tone)",
@@ -338,7 +305,7 @@
                 .column(
                     LineUpJS.buildNumberColumn("CTnCTR", [0, 1])
                         .width(width_single_value)
-                        .renderer("tick")
+                        .renderer("dot")
                         .label("CTnCTR (chord tone to non chord tone ratio)")
                         .colorMapping(
                             d3.scaleLinear(
@@ -349,8 +316,31 @@
                         .htmlSummary(
                             "0 = red = only non chord tones<br> 1 = blue = only chord tones (or at least proper non chord tones)<br> ",
                         ),
-                ); // range [0,1], 0 is only non-chord-tones, 1 is only chord-tones, or proper-non-chord-tones (proper in the sense of accepted non-chord-tones, because they are positively interesting)
+                ) // range [0,1], 0 is only non-chord-tones, 1 is only chord-tones, or proper-non-chord-tones (proper in the sense of accepted non-chord-tones, because they are positively interesting)
 
+                .column(
+                    LineUpJS.buildCategoricalColumn("key")
+                        .categories(KEYS)
+                        .width(width_single_value)
+                        .renderer("cattick")
+                        .label("Key"),
+                )
+                .column(
+                    LineUpJS.buildActionsColumn()
+                        .width(width_single_value)
+                        .actions([
+                            {
+                                name: "play",
+                                title: "Play harmonization",
+                                icon: (row) =>
+                                    music.playing_index === row.i ? "⏸" : "▶",
+                                action: (row) => {
+                                    playHarmonization(row);
+                                },
+                            },
+                        ])
+                        .label("Play"),
+                );
             /*
                 .column(
                     LineUpJS.buildCategoricalColumn("AI_Model")
@@ -450,13 +440,32 @@
                 .column("Typical chord transition indication per chord")
                 .column("Bass Tones (midi)");
 
-            builder
-                .ranking(functional_analysis)
-                .ranking(ranking_metrics_of_yeh)
-                .ranking(small_ranking)
-                .defaultRanking();
+            const default_ranking = LineUpJS.buildRanking()
+                .column("Play")
+                .column("key")
+                .column("Typicality Percentage")
+                .column("Typical chord transition indication per chord")
+                .column("CC (Chord Coverage)")
+                .column("Chords")
+                .column("Roman Numerals")
+                .column("PCS average (pitch consonance score)")
+                .column("PCS progression (pitch consonance score)")
+                .column("CTnCTR (chord tone to non chord tone ratio)")
+                .column("CT class progression (chord tone)")
+                .column("MCTD average (melody chord tonal distance)")
+                .column("MCTD progression (melody tone chord tonal distance)")
+                .column("CTD average (chord tonal distance)")
+                .column("CTD per chord (chord tonal distance)")
+                .column("CHE (Chord Histogram Entropy)");
 
-            builder.overviewMode(); // use that mode initially, to follow paradigm: overview first, zoom and filter, details on demand
+            builder
+                //.ranking(functional_analysis)
+                //.ranking(ranking_metrics_of_yeh)
+                //.ranking(small_ranking)
+                .ranking(default_ranking);
+            //.defaultRanking();
+
+            //builder.overviewMode(); // use that mode initially, to follow paradigm: overview first, zoom and filter, details on demand
             lineUp = builder.buildTaggle(container); // when using Taggle, there is an overview option that comes in handy for more samples than can fit in the screen
             lineUp.on("selectionChanged", selectionChangedListener);
             lineUp.on("highlightChanged", (dataIndex) => {
@@ -494,5 +503,19 @@
     .lineup {
         width: 100%;
         height: 100%;
+    }
+    /* override overflow for all data cells */
+    :global(.le-td) {
+        overflow: hidden !important;
+        white-space: nowrap !important;
+        text-overflow: ellipsis !important;
+        font-size: 14px !important;
+        line-height: 18px !important;
+    }
+
+    :global(.lu-actions) {
+        opacity: 1;
+        visibility: visible;
+        cursor: pointer;
     }
 </style>

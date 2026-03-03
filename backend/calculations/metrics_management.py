@@ -2,11 +2,66 @@ from functional_analysis import get_roman_numerals, get_typical_chord_progressio
 from metrics_based_on_yeh_et_al import CHE_and_CC, CTD, CTnCTR, PCS, MCTD
 from music21 import *
 
+def harmonization_to_midi_events(harmonization, melody):
+    events = []
+
+
+    if not isinstance(harmonization, stream.Stream):
+        harmonization_stream = stream.Stream(harmonization)
+    else:
+        harmonization_stream = harmonization
+    # --- 1. Add harmonization (chords) ---
+    for n in harmonization_stream.notes:  # flatten to get all notes in the stream
+        start = float(n.offset)
+        duration = float(n.quarterLength)
+        end = start + duration
+
+        if isinstance(n, note.Note):
+            events.append({
+                "pitch": n.pitch.midi,
+                "startTime": start,
+                "endTime": end,
+            })
+        elif isinstance(n, chord.Chord):
+            for p in n.pitches:
+                events.append({
+                    "pitch": p.midi,
+                    "startTime": start,
+                    "endTime": end,
+                })
+
+    if not isinstance(melody, stream.Stream):
+        melody_stream = stream.Stream(melody)
+    else:
+        melody_stream = melody
+
+    # --- 2. Add melody from music21 stream ---
+    for n in melody_stream.notes:  # flatten to get all notes in the stream
+        start = float(n.offset)
+        duration = float(n.quarterLength)
+        end = start + duration
+
+        if isinstance(n, note.Note):
+            events.append({
+                "pitch": n.pitch.midi,
+                "startTime": start,
+                "endTime": end,
+            })
+        elif isinstance(n, chord.Chord):
+            for p in n.pitches:
+                events.append({
+                    "pitch": p.midi,
+                    "startTime": start,
+                    "endTime": end,
+                })
+
+    # --- 3. Sort by startTime (important for playback) ---
+    events.sort(key=lambda e: e["startTime"])
+
+    return events
 
 def calculate_metrics(score, harmonizations_json):
     # kind of register here all different metrics that can be calculated?
-
-    print("%%%%%% calculate metrics %%%%%%%%%")
 
     harmonizations = list(score.getElementsByGroup("harmonization"))
 
@@ -36,6 +91,8 @@ def calculate_metrics(score, harmonizations_json):
         harmonizations_json[i]["chords_bass_note"] = bass_notes
         harmonizations_json[i]["chords_bass_note_midi"] = bass_notes_midi
 
+        harmonizations_json[i]["midiplayback"] = harmonization_to_midi_events(harmonization, melody)
+
         # compute and save some metrics
         # save all metrics results alongside the respective harmonization, since the melody is for all the same
         # in particular also results that may belong more to the melody are kept here anyways
@@ -55,7 +112,6 @@ def calculate_metrics(score, harmonizations_json):
                                                                                                      key,
                                                                                                      chord_durations)
 
-    print("--------------------------------------------------")
     # print(harmonizations_json)
     # harmonizations.show("text")
     # score.show("text")

@@ -5,7 +5,8 @@ export const music = $state({
     selected_harmonizations_indeces: [],
     highlighted_harmonization_index: -1, // -1 resembles non highlighted
     highlighted_harmonization: {}, // the single harmonization itself
-    meta: {}
+    meta: {},
+    playing_index: -1,
 });
 
 // should be 1/32 note duration, based on a quarter note length that is 1.

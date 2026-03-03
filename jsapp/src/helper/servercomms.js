@@ -43,7 +43,6 @@ export async function getMetrics() {
     } else if (music.harmonizations.length === 0) {
         alert('Without harmonizations the metrics can not be calculated.');
     } else {
-        document.getElementById("messages_div").innerHTML = "Computing harmonization metrics..."
         const response = await fetch('http://127.0.0.1:5000/metrics', {
             method: 'POST',
             body: JSON.stringify({ "harmonizations": music.harmonizations, "melody": music.melody }),
@@ -54,11 +53,9 @@ export async function getMetrics() {
                 "Access-Control-Allow-Origin": "*"
             }
         });
-        document.getElementById("messages_div").innerHTML = "Status: " + response.status + ": " + response.statusText;
         let music_data = await response.json();
         music.harmonizations = music_data.harmonizations;
         music.meta = music_data.meta;
-        document.getElementById("messages_div").innerHTML = "Received harmonization metrics." + " Status: " + response.status + ": " + response.statusText;
         //music.melody = music_data.melody; //should not be necessary since no changes to melody expected
     }
 }
@@ -73,8 +70,6 @@ export async function getHarmonizationsAutoharmonizer() {
         );
     } else {
         //alert('Harmonizing...'); // blocks processing
-        document.getElementById("messages_div").innerHTML =
-            "Generating harmonizations...";
         //fetch harmonizations from AutoHarmonizer
         const AI_response = await fetch(
             "http://127.0.0.1:5555/autoharmonizer",
@@ -96,8 +91,6 @@ export async function getHarmonizationsAutoharmonizer() {
         let music_data = await AI_response.json();
         //harmonizations["harmonizations"] = music_data;
         music.harmonizations = music_data;
-        document.getElementById("messages_div").innerHTML =
-            "Received harmonizations.";
         // probably due to "await" the request for metrics calculation starts only when the above is received
 
         // request for variants within chords of a harmonization
@@ -121,15 +114,12 @@ export async function getExistingHarmonizations() {
         );
     } else {
         //alert('Harmonizing...'); // blocks processing
-        document.getElementById("messages_div").innerHTML =
-            "Getting harmonizations...";
+
         //fetch existing harmonizations
         const AI_response = await fetch(
             "http://127.0.0.1:5555/existing_harmonizations",
         );
         music.harmonizations = await AI_response.json();
-        document.getElementById("messages_div").innerHTML =
-            "Received harmonizations.";
         // probably due to "await" the request for metrics calculation starts only when the above is received
 
         // request for variants within chords of a harmonization

@@ -10,10 +10,7 @@
         getExampleMelody,
         getOtherExampleMelody,
     } from "../helper/servercomms.js";
-    import {
-        harmonizations_for_own_melody,
-        alle_meine_entchen_harmonizations,
-    } from "../helper/examples.js";
+    import { harmonizations_for_own_melody } from "../helper/examples.js";
 
     function getExampleHarmonizations() {
         //music.harmonizations = alle_meine_entchen_harmonizations;
