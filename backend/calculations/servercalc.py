@@ -81,7 +81,7 @@ def provideMetrics():
 
     # then hand over to a metrics calculation management script, that has access to all metric functions
     # that script saves the results in the representation? since that is possible for both...
-    harmonizations_and_metrics = calculate_metrics(music_data_music21, harmonizations_json)
+    harmonizations_and_metrics = calculate_metrics(music_data_music21, harmonizations_json, None)
 
     # convert back to json table including all the calculated data
     # currently not needed, since all is directly put in the harmonizations_json dict
@@ -91,6 +91,28 @@ def provideMetrics():
     meta_data = get_note_ranges(music_data_music21)
 
     return jsonify({"harmonizations": harmonizations_and_metrics, "melody": music_data_json["melody"], "meta": meta_data})
+
+
+@app.route("/singleMetrics", methods=['POST'])
+def provideSingleMetrics():
+    music_data_json = request.json
+    harmonizations_json = music_data_json["harmonizations"]
+    key = music_data_json["key"]
+    
+    # melody_json = music_data_json["melody"]
+
+    # first convert to music21 representation
+    music_data_music21 = json_to_music21(music_data_json)
+
+    # then hand over to a metrics calculation management script, that has access to all metric functions
+    # that script saves the results in the representation? since that is possible for both...
+    harmonizations_and_metrics = calculate_metrics(music_data_music21, harmonizations_json, key)
+
+    meta_data = get_note_ranges(music_data_music21)
+
+    return jsonify({"harmonization": harmonizations_and_metrics, "meta": meta_data})
+
+
 
 
 @app.route("/variations_within_chords", methods=['POST'])

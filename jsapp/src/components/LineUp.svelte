@@ -3,62 +3,132 @@
         music,
         process_harmonizations_for_visualization,
         smallest_duration_considered,
+        selectedIndex,
+        selectedKey,
     } from "../state.svelte.js";
+
+    import { onMount } from "svelte";
 
     import { playHarmonization } from "../helper/musicutil.js";
 
     import * as LineUpJS from "lineupjs";
     import * as d3 from "d3";
     import "../../node_modules/lineupjs/build/LineUpJS.css";
+    import { getSingleRowMetrics } from "../helper/servercomms.js";
 
     let container;
     //let container2;
 
     let lineUp;
 
+    let observer;
+
     const KEYS = [
         "C major",
-        "G major",
-        "D major",
-        "A major",
-        "E major",
-        "B major",
-        "F# major",
-        "C# major",
-        "F major",
-        "Bb major",
-        "Eb major",
-        "Ab major",
-        "Db major",
-        "Gb major",
-        "Cb major",
         "A minor",
+
+        "G major",
         "E minor",
+
+        "D major",
         "B minor",
+
+        "A major",
         "F# minor",
+
+        "E major",
         "C# minor",
+
+        "B major",
         "G# minor",
+
+        "F# major",
+        "Gb major",
         "D# minor",
-        "A# minor",
-        "D minor",
-        "G minor",
-        "C minor",
-        "F minor",
-        "Bb minor",
         "Eb minor",
-        "Ab minor",
+
+        "Db major",
+        "Bb minor",
+
+        "Ab major",
+        "F minor",
+
+        "Eb major",
+        "C minor",
+
+        "Bb major",
+        "G minor",
+
+        "F major",
+        "D minor",
     ];
+
+    onMount(() => {
+        observer = new MutationObserver(checkForKeyHeader);
+
+        observer.observe(container, {
+            childList: true,
+            subtree: true,
+        });
+    });
+
+    function checkForKeyHeader() {
+        if (container) {
+            const spacingDiv = container.querySelector(
+                'section[title="Key"] .lu-spacing',
+            );
+
+            if (!spacingDiv) return;
+
+            if (!spacingDiv.querySelector("#key-select")) {
+                addSelectionToLineUp(spacingDiv);
+
+                // optional: stop observer after adding
+                //observer.disconnect();
+            }
+        }
+    }
 
     const processed = $derived.by(() => {
         return process_harmonizations_for_visualization(music.harmonizations);
     });
 
     $effect(() => {
-        if (music.harmonizations.length === 0) {
-            // inform user that first harmonizations are needed
-            document.getElementById("lineup").innerHTML =
-                "No data available to show in lineup.";
+        const idx = $selectedIndex;
+        if (idx >= 0 && music.harmonizations[idx]) {
+            // Set selectedKey to the key of the selected harmonization
+            selectedKey.set(music.harmonizations[idx].key);
         } else {
+            // No selection
+            selectedKey.set("");
+        }
+        const select = container?.querySelector("#key-select");
+        if (select && select.value !== $selectedKey) {
+            select.value = $selectedKey;
+        }
+    });
+
+    function updateKey(event) {
+        const newKey = event.target.value;
+        if ($selectedIndex === -1) return;
+
+        getSingleRowMetrics($selectedIndex, newKey);
+
+        /*
+        // Update the original harmonization
+        music.harmonizations[$selectedIndex].key = newKey;
+
+        // Update the processed data for LineUp
+        processed[$selectedIndex].key = newKey;
+
+        */
+
+        // Trigger LineUp rerender
+        //lineUp.data.setData(processed);
+    }
+
+    $effect(() => {
+        if (music.harmonizations.length > 0) {
             //change of innerHTML needs to come before adding lineup for some reason
             document.getElementById("lineup").innerHTML = "";
             //document.getElementById("lineup2").innerHTML = "";
@@ -325,15 +395,14 @@
                         .renderer("cattick")
                         .label("Key"),
                 )
+
                 .column(
                     LineUpJS.buildActionsColumn()
-                        .width(width_single_value)
+                        .width(width_single_value / 3)
                         .actions([
                             {
                                 name: "play",
-                                title: "Play harmonization",
-                                icon: (row) =>
-                                    music.playing_index === row.i ? "⏸" : "▶",
+                                icon: "▶",
                                 action: (row) => {
                                     playHarmonization(row);
                                 },
@@ -482,10 +551,36 @@
         }
     });
 
+    function addSelectionToLineUp(spacingDiv) {
+        if (spacingDiv && !spacingDiv.querySelector("select")) {
+            const select = document.createElement("select");
+            select.id = "key-select";
+
+            // Populate options
+            KEYS.forEach((k) => {
+                const opt = document.createElement("option");
+                opt.value = k;
+                opt.textContent = k;
+                select.appendChild(opt);
+            });
+
+            // Set initial value
+            select.value = $selectedKey;
+
+            // Listen to changes
+            select.addEventListener("change", (e) => {
+                updateKey(e);
+            });
+
+            spacingDiv.appendChild(select);
+        }
+    }
+
     function selectionChangedListener(selection) {
         selection.sort((a, b) => {
             return a - b;
         });
+        selectedIndex.set(selection[0] ?? -1);
         music.selected_harmonizations_indeces = selection;
         music.selected_harmonizations = []; // get rid of not anymore selected
         for (let index of selection) {
@@ -494,16 +589,16 @@
     }
 </script>
 
-<div id="lineup" class="lineup" bind:this={container}>
-    No data available to show in lineup.
-</div>
+<div id="lineup" class="lineup" bind:this={container}></div>
 
 <style>
     /* width and height setting needed to get lineup to show up properly */
     .lineup {
         width: 100%;
         height: 100%;
+        position: relative;
     }
+
     /* override overflow for all data cells */
     :global(.le-td) {
         overflow: hidden !important;
@@ -517,5 +612,11 @@
         opacity: 1;
         visibility: visible;
         cursor: pointer;
+    }
+
+    :global(.le-tr.playing span[title="play"]) {
+        color: #cca22e;
+        font-weight: bold;
+        transform: scale(1.2);
     }
 </style>

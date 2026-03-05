@@ -4,6 +4,7 @@
     import { music } from "./state.svelte.js";
     import Harmonic_Leadsheet from "./components/Harmonic_Leadsheet.svelte";
     import PianoRoll from "./components/PianoRoll.svelte";
+    import LeadsheetAddition from "./components/LeadsheetAddition.svelte";
 
     //     viewbox: "0 -60 16 20"
 
@@ -44,6 +45,7 @@
             <PianoRoll
                 data={{
                     music_notes: music.melody,
+                    harmonization: music.selected_harmonizations[0],
                     coloring: "pitch_class",
                     viewbox: "default",
                     width: "100%",
@@ -54,13 +56,10 @@
         <div id="buttons-container">
             <ButtonMenu />
         </div>
-        <div id="lineup-container">
-            <LineUp />
-        </div>
 
         <div id="selected-harmonizations-container">
             {#each music.selected_harmonizations as harmonization}
-                <Harmonic_Leadsheet
+                <LeadsheetAddition
                     data={{
                         music_notes: harmonization,
                         coloring_melody: "pitch_class",
@@ -85,6 +84,9 @@
                 />
             {/if}
         </div>
+        <div id="lineup-container">
+            <LineUp />
+        </div>
     </div>
 </main>
 
@@ -98,7 +100,7 @@
         width: 99%;
         display: grid;
         grid-template-columns: 1fr 440px 440px;
-        grid-template-rows: 18% 50% 32%;
+        grid-template-rows: 18% 31% 50%;
         grid-gap: 3px;
         overflow: hidden;
     }
@@ -126,8 +128,8 @@
 
     #selected-harmonizations-container {
         grid-column-start: 1;
-        grid-column-end: 2;
-        overflow: auto;
+        grid-column-end: 3;
+        overflow: hidden;
     }
 
     .horizontal-divider-div {
@@ -137,7 +139,7 @@
     }
 
     .highlighted-harmonization-container {
-        grid-column-start: 2;
+        grid-column-start: 3;
         grid-column-end: 4;
         overflow: hidden;
     }

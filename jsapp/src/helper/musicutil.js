@@ -1,17 +1,20 @@
 import * as mm from "@magenta/music";
 import { music } from "../state.svelte.js";
+import { run } from "svelte/legacy";
 
 let magentaPlayer = null;
 
-let currentlyPlayed = -1
+let playTimeout = null
 
 export function playHarmonization(row) {
     const data = row.v
     const index = row.i
-    console.log(music.playing_index, index)
+    //console.log(music.playing_index, index)
     if (music.playing_index === index) {
+        clearTimeout(playTimeout)
         magentaPlayer.stop();
         music.playing_index = -1
+        highlightPlayingRow(-1)
     } else {
         const events = data.midiplayback;
 
@@ -20,9 +23,12 @@ export function playHarmonization(row) {
             magentaPlayer.stop();
         } else {
             magentaPlayer = new mm.SoundFontPlayer("https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus")
+
         }
 
         music.playing_index = index
+        highlightPlayingRow(index)
+        clearTimeout(playTimeout)
 
         // Play the notes
         let seq = {
@@ -30,12 +36,26 @@ export function playHarmonization(row) {
             totalLength: Math.max(...data.midiplayback.map(v => v.endTime)),
             tempos: [{ qpm: 120 }],
         }
+        magentaPlayer.start(seq)
 
-        console.log(seq)
+        playTimeout = setTimeout(() => {
+            console.log("Playback finished");
 
-        magentaPlayer.start(seq).then(() => {
-            music.playing_index = -1
-            magentaPlayer.stop()
-        });
+            music.playing_index = -1;
+            highlightPlayingRow(-1);
+            magentaPlayer.stop();
+        }, seq.totalLength * 1000 + 200);
     }
+}
+
+export function highlightPlayingRow(index) {
+    console.log("highlighting row", index)
+    document
+        .querySelectorAll(".le-tr")
+        .forEach(r => r.classList.remove("playing"));
+
+    if (index === -1) return;
+
+    const row = document.querySelector(`.le-tr[data-i="${index}"]`);
+    if (row) row.classList.add("playing");
 }

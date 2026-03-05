@@ -60,6 +60,33 @@ export async function getMetrics() {
     }
 }
 
+export async function getSingleRowMetrics(idx, key) {
+    const row = music.harmonizations[idx];
+    //FIXME error handling when server response is in some way (most often either server is not running or internal server error due to bug in my code) failing + communication to user
+    if (Object.keys(music.melody).length === 0) {
+        alert('Without melody the metrics can not be calculated.');
+    } else if (music.harmonizations.length === 0) {
+        alert('Without harmonizations the metrics can not be calculated.');
+    } else {
+        const response = await fetch('http://127.0.0.1:5000/singleMetrics', {
+            method: 'POST',
+            body: JSON.stringify({ "harmonizations": [row], "melody": music.melody, "key": key }),
+            headers: {
+                "Access-Control-Allow-Headers": "*", // this will allow all CORS requests
+                "Access-Control-Allow-Methods": 'OPTIONS,POST,GET', // this states the allowed methods
+                "Content-Type": "application/json", // this shows the expected content type
+                "Access-Control-Allow-Origin": "*"
+            }
+        });
+        let music_data = await response.json();
+        music.harmonizations[idx] = music_data.harmonization[0];
+        music_data.meta.latest_end > music.meta.latest_end ? music.meta.latest_end = music_data.meta.latest_end : null;
+        music_data.meta.earliest_start < music.meta.earliest_start ? music.meta.earliest_start = music_data.meta.earliest_start : null;
+        music_data.meta.max_pitch > music.meta.max_pitch ? music.meta.max_pitch = music_data.meta.max_pitch : null;
+        music_data.meta.min_pitch < music.meta.min_pitch ? music.meta.min_pitch = music_data.meta.min_pitch : null;
+    }
+}
+
 
 export async function getHarmonizationsAutoharmonizer() {
     //TODO the computations take their time... add info for the user that it is working in the background and to be patient?

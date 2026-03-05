@@ -1,15 +1,19 @@
 # import re
 import regex as re
 
-from music21 import harmony, roman
+from music21 import harmony, roman, key
 
 
-def get_roman_numerals(harmonization):
-    key = harmonization.analyze('key')
+def get_roman_numerals(harmonization, setKey):
+    if setKey is None:
+        tkey = harmonization.analyze('key')
+    else:
+        tonic, mode = setKey.split()
+        tkey = key.Key(tonic, mode)
     roman_numerals = []
     for chord_symbol in harmonization.getElementsByClass(harmony.ChordSymbol):
-        roman_numerals.append(roman.romanNumeralFromChord(chord_symbol, key).figure)
-    return key, roman_numerals
+        roman_numerals.append(roman.romanNumeralFromChord(chord_symbol, tkey).figure)
+    return tkey, roman_numerals
 
 
 # range of [0, 1] given as % values for understandability of users

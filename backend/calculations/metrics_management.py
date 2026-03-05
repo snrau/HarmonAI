@@ -60,7 +60,7 @@ def harmonization_to_midi_events(harmonization, melody):
 
     return events
 
-def calculate_metrics(score, harmonizations_json):
+def calculate_metrics(score, harmonizations_json, setKey):
     # kind of register here all different metrics that can be calculated?
 
     harmonizations = list(score.getElementsByGroup("harmonization"))
@@ -104,7 +104,10 @@ def calculate_metrics(score, harmonizations_json):
         harmonizations_json[i]["MCTD_average"], harmonizations_json[i]["MCTD_progression"] = MCTD(melody, harmonization)
 
         # functional analysis
-        key, roman_numerals = get_roman_numerals(harmonization)
+        if setKey is None:
+            key, roman_numerals = get_roman_numerals(harmonization, None)
+        else:
+            key, roman_numerals = get_roman_numerals(harmonization, setKey)
         harmonizations_json[i]["key"] = str(key)
         harmonizations_json[i]["roman_numerals"] = roman_numerals
         harmonizations_json[i]["typical_chord_progression_coverage"], harmonizations_json[i][

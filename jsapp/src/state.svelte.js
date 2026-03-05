@@ -1,3 +1,5 @@
+import { writable } from "svelte/store";
+
 export const music = $state({
     harmonizations: [], /* ... */
     melody: {},
@@ -8,6 +10,9 @@ export const music = $state({
     meta: {},
     playing_index: -1,
 });
+
+export const selectedIndex = writable(-1);
+export const selectedKey = writable("");
 
 // should be 1/32 note duration, based on a quarter note length that is 1.
 export const smallest_duration_considered = 0.125
@@ -28,7 +33,7 @@ export function process_melody_for_visualization(melody) {
 export function process_harmonizations_for_visualization(harmonizations) {
     let processed_harmonizations = [];
 
-    if (harmonizations[0]["key"]) {
+    if (harmonizations[0] && harmonizations[0]["key"]) {
 
         for (let harmonization of harmonizations) {
             let processed_harmonization = {};
