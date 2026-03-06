@@ -22,8 +22,8 @@ export function playHarmonization(row) {
         if (magentaPlayer) {
             magentaPlayer.stop();
         } else {
-            magentaPlayer = new mm.SoundFontPlayer("https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus")
-
+            magentaPlayer = new mm.SoundFontPlayer("https://storage.googleapis.com/magentadata/js/soundfonts/salamander")
+            // magentaPlayer = new mm.SoundFontPlayer("https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus")
         }
 
         music.playing_index = index

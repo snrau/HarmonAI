@@ -374,9 +374,7 @@
     <p>visualize_melody: {visualize_melody}</p>
     <p>number_of_notes: {number_of_notes}</p>
     -->
-    {#if number_of_notes <= 0}
-        <p>No notes to show.</p>
-    {:else}
+    {#if number_of_notes > 0}
         <!--
         <p>min_x: {Math.min(...notes["note_starting_times"])}</p>
         <p>min_y: {-1 * Math.max(...notes["note_pitches_midi"])}</p>
@@ -384,11 +382,97 @@
         <p>
             min_height: {Math.abs(-1 * Math.max(...notes["note_pitches_midi"]) - -1 * Math.min(...notes["note_pitches_midi"])) + 1}</p>
         -->
-        {#if visualize_melody}
+
+        <svg
+            {width}
+            height={0.71 * height}
+            viewBox={viewbox_attributes}
+            style="border:1.5px solid black;background-color: white"
+            preserveAspectRatio="none"
+        >
+            <!-- background vertical units -->
+            {#each Array(number_of_smallest_units_in_piece) as _, i}
+                <rect
+                    x={i * smallest_duration_considered}
+                    y={viewbox_attributes.split(" ")[1]}
+                    width={smallest_duration_considered}
+                    height={viewbox_attributes.split(" ")[3]}
+                    fill={coloring_background[i]}
+                    opacity="60%"
+                />
+            {/each}
+
+            <!-- background horizontal lines -->
+            <!--        for each midi pitch draw a background line that is colorable  (Midi values are constrained to the space 0-127)-->
+            <!-- somehow determine color by a function that can use different strategies for coloring (e.g. alternating two colors, pitchclass, consonance, ...) -->
+            {#each Array(128) as _, i}
+                <!-- colorable -->
+                <line
+                    x1={viewbox_attributes.split(" ")[0]}
+                    y1={-1 * i + 0.5}
+                    x2={viewbox_attributes.split(" ")[0] +
+                        viewbox_attributes.split(" ")[2]}
+                    y2={-1 * i + 0.5}
+                    style="stroke-width:0.9;opacity:15%"
+                    stroke={getPitchClassColor(i % 12, "black_and_white")}
+                />
+            {/each}
+
+            <!-- actual notes -->
+            {#if visualize_melody}
+                <!-- color encoding in the note centers -->
+                {#each Array(number_of_smallest_units_in_piece) as _, i}
+                    <rect
+                        x={i * smallest_duration_considered}
+                        y={-1 *
+                            music.melody[
+                                "note_pitches_midi_reflecting_durations"
+                            ][i]}
+                        width={smallest_duration_considered}
+                        height={1}
+                        fill={coloring_note_center[i]}
+                        opacity={1}
+                    />
+                {/each}
+                <!-- melody notes -->
+                {#each Array(number_of_notes) as _, i}
+                    <rect
+                        x={music.melody["note_starting_times"][i]}
+                        y={-1 * music.melody["note_pitches_midi"][i]}
+                        width={music.melody["note_durations"][i]}
+                        height={1}
+                        fill-opacity="0%"
+                        fill={coloring[i]}
+                        stroke-opacity="100%"
+                        stroke-width={0.15}
+                        rx={0.2}
+                    />
+                {/each}
+            {:else}
+                <!-- harmonization notes -->
+                {#each Array(number_of_notes) as _, i}
+                    <rect
+                        x={notes_harmonization["note_starting_times"][i]}
+                        y={-1 * notes_harmonization["note_pitches_midi"][i]}
+                        width={notes_harmonization["note_durations"][i]}
+                        height={1}
+                        fill={"#666#"}
+                        fill-opacity="0.6"
+                        stroke={"#666#"}
+                        stroke-width={0.15}
+                        stroke-opacity="1"
+                        rx={0.2}
+                    />
+                {/each}
+            {/if}
+        </svg>
+
+        <!-- make the bands with roman numerals and chord symbols  (below the pianoroll if pianoroll displays a harmonization) -->
+        {#if !visualize_melody}
             <!-- make chords band -->
             <svg
                 {width}
-                height={0.25 * height}
+                height={0.15 * height}
                 style="border:1.5px solid black"
                 viewBox={viewbox_attributes.split(" ")[0] +
                     " 0 " +
@@ -423,123 +507,12 @@
                     </text>
                 {/each}
             </svg>
-            <br />
-        {/if}
-        <svg
-            {width}
-            height={0.74 * height}
-            viewBox={viewbox_attributes}
-            style="border:1.5px solid black;background-color: white"
-            preserveAspectRatio="none"
-        >
-            <!-- background vertical units -->
-            {#each Array(number_of_smallest_units_in_piece) as _, i}
-                <rect
-                    x={i * smallest_duration_considered}
-                    y={viewbox_attributes.split(" ")[1]}
-                    width={smallest_duration_considered}
-                    height={viewbox_attributes.split(" ")[3]}
-                    fill={coloring_background[i]}
-                    opacity="60%"
-                />
-            {/each}
 
-            <!-- background horizontal lines -->
-            <!--        for each midi pitch draw a background line that is colorable  (Midi values are constrained to the space 0-127)-->
-            <!-- somehow determine color by a function that can use different strategies for coloring (e.g. alternating two colors, pitchclass, consonance, ...) -->
-            {#each Array(128) as _, i}
-                <!-- non-opaque -->
-                <line
-                    x1={viewbox_attributes.split(" ")[0]}
-                    y1={-1 * i + 0.5}
-                    x2={viewbox_attributes.split(" ")[0] +
-                        viewbox_attributes.split(" ")[2]}
-                    y2={-1 * i + 0.5}
-                    style="stroke-width:0.4;opacity:50%"
-                    stroke="#a0a0a0"
-                />
-                <!-- colorable -->
-                <line
-                    x1={viewbox_attributes.split(" ")[0]}
-                    y1={-1 * i + 0.5}
-                    x2={viewbox_attributes.split(" ")[0] +
-                        viewbox_attributes.split(" ")[2]}
-                    y2={-1 * i + 0.5}
-                    style="stroke-width:0.3;opacity:20%"
-                    stroke={getPitchClassColor(i % 12, "black_and_white")}
-                />
-            {/each}
-
-            <!-- actual notes -->
-            {#if visualize_melody}
-                <!-- color encoding in the note centers -->
-                {#each Array(number_of_smallest_units_in_piece) as _, i}
-                    <rect
-                        x={i * smallest_duration_considered}
-                        y={-1 *
-                            music.melody[
-                                "note_pitches_midi_reflecting_durations"
-                            ][i]}
-                        width={smallest_duration_considered}
-                        height={1}
-                        fill={"black"}
-                        opacity="100%"
-                    />
-                    <rect
-                        x={i * smallest_duration_considered}
-                        y={-1 *
-                            music.melody[
-                                "note_pitches_midi_reflecting_durations"
-                            ][i]}
-                        width={smallest_duration_considered}
-                        height={1}
-                        fill={coloring_note_center[i]}
-                        opacity={1}
-                    />
-                {/each}
-                <!-- melody notes -->
-                {#each Array(number_of_notes) as _, i}
-                    <rect
-                        x={music.melody["note_starting_times"][i]}
-                        y={-1 * music.melody["note_pitches_midi"][i]}
-                        width={music.melody["note_durations"][i]}
-                        height={1}
-                        fill-opacity="0%"
-                        fill={coloring[i]}
-                        stroke={getPitchClassColor(
-                            music.melody["note_pitch_classes"][i],
-                        )}
-                        stroke-opacity="100%"
-                        stroke-width={0.15}
-                        rx={0.2}
-                    />
-                {/each}
-            {:else}
-                <!-- harmonization notes -->
-                {#each Array(number_of_notes) as _, i}
-                    <rect
-                        x={notes_harmonization["note_starting_times"][i]}
-                        y={-1 * notes_harmonization["note_pitches_midi"][i]}
-                        width={notes_harmonization["note_durations"][i]}
-                        height={1}
-                        fill={coloring[i]}
-                        fill-opacity="0.6"
-                        stroke={coloring[i]}
-                        stroke-width={0.15}
-                        stroke-opacity="1"
-                        rx={0.2}
-                    />
-                {/each}
-            {/if}
-        </svg>
-
-        <!-- make the bands with roman numerals and chord symbols  (below the pianoroll if pianoroll displays a harmonization) -->
-        {#if !visualize_melody}
             <br />
             <!-- roman numerals -->
             <svg
                 {width}
-                height={0.2 * height}
+                height={0.15 * height}
                 style="border:1.5px solid black"
                 viewBox={viewbox_attributes.split(" ")[0] +
                     " 0 " +

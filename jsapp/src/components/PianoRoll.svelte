@@ -64,7 +64,7 @@
             return colors;
         } else {
             for (let i = 0; i < number_of_notes; ++i) {
-                colors.push("grey");
+                colors.push("#666");
             }
         }
 

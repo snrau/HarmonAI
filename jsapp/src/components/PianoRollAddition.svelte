@@ -208,7 +208,7 @@
                     y={-1 * notes_harmonization["note_pitches_midi"][i]}
                     width={notes_harmonization["note_durations"][i]}
                     height={1}
-                    fill={"grey"}
+                    fill={"#666"}
                     //stroke={coloring[i]}
                     stroke-width={0.15}
                     stroke-opacity="1"

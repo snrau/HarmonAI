@@ -25,42 +25,42 @@
 
     const KEYS = [
         "C major",
-        "A minor",
+        "a minor",
 
         "G major",
-        "E minor",
+        "e minor",
 
         "D major",
-        "B minor",
+        "b minor",
 
         "A major",
-        "F# minor",
+        "f# minor",
 
         "E major",
-        "C# minor",
+        "c# minor",
 
         "B major",
-        "G# minor",
+        "g# minor",
 
         "F# major",
-        "Gb major",
-        "D# minor",
-        "Eb minor",
+        "G- major",
+        "d# minor",
+        "e- minor",
 
-        "Db major",
-        "Bb minor",
+        "D- major",
+        "b- minor",
 
-        "Ab major",
-        "F minor",
+        "A- major",
+        "f minor",
 
-        "Eb major",
-        "C minor",
+        "E- major",
+        "c minor",
 
-        "Bb major",
-        "G minor",
+        "B- major",
+        "g minor",
 
         "F major",
-        "D minor",
+        "d minor",
     ];
 
     onMount(() => {
@@ -74,18 +74,21 @@
 
     function checkForKeyHeader() {
         if (container) {
-            const spacingDiv = container.querySelector(
-                'section[title="Key"] .lu-spacing',
-            );
+            processed.forEach((_, row) => {
+                const selector = "col" + (row + 1);
+                const spacingDiv = container.querySelector(
+                    'article[data-ranking="rank0"] div[data-i="' +
+                        row +
+                        '"] div[data-id="col1"] .lu-cat-label', //'section[title="Key"] .lu-spacing',
+                );
 
-            if (!spacingDiv) return;
+                if (spacingDiv && !spacingDiv.querySelector("#key-select")) {
+                    addSelectionToLineUp(spacingDiv, row);
 
-            if (!spacingDiv.querySelector("#key-select")) {
-                addSelectionToLineUp(spacingDiv);
-
-                // optional: stop observer after adding
-                //observer.disconnect();
-            }
+                    // optional: stop observer after adding
+                    //observer.disconnect();
+                }
+            });
         }
     }
 
@@ -93,6 +96,7 @@
         return process_harmonizations_for_visualization(music.harmonizations);
     });
 
+    /*
     $effect(() => {
         const idx = $selectedIndex;
         if (idx >= 0 && music.harmonizations[idx]) {
@@ -107,12 +111,13 @@
             select.value = $selectedKey;
         }
     });
+    */
 
-    function updateKey(event) {
+    function updateKey(event, idx) {
         const newKey = event.target.value;
-        if ($selectedIndex === -1) return;
+        if (idx === -1) return;
 
-        getSingleRowMetrics($selectedIndex, newKey);
+        getSingleRowMetrics(idx, newKey);
 
         /*
         // Update the original harmonization
@@ -551,8 +556,9 @@
         }
     });
 
-    function addSelectionToLineUp(spacingDiv) {
+    function addSelectionToLineUp(spacingDiv, row) {
         if (spacingDiv && !spacingDiv.querySelector("select")) {
+            spacingDiv.textContent = "";
             const select = document.createElement("select");
             select.id = "key-select";
 
@@ -565,11 +571,12 @@
             });
 
             // Set initial value
-            select.value = $selectedKey;
+            console.log(row, music.harmonizations[row]?.key);
+            select.value = music.harmonizations[row]?.key || "";
 
             // Listen to changes
             select.addEventListener("change", (e) => {
-                updateKey(e);
+                updateKey(e, row);
             });
 
             spacingDiv.appendChild(select);
