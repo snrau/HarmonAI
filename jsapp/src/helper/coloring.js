@@ -168,12 +168,22 @@ function get_CTD_Color(value) {
     );
 }
 
-export function getPitchClassColor(pitchclass, color_palette = "black_and_white") {
+export function getPitchClassColor(pitchclass, color_palette = "meaningful_fifths") {
     // TODO select useful coloring
     // rainbow
     // black white as piano tastatur
     // helle farben weiße tasten, dunkle farben schwarze tasten
     // circle of ... fifths/thirds/... or other ideas from literature
+
+    if (color_palette.includes("meaningful")) {
+        if (color_palette === "meaningful_fifths") {
+            return cyclicHarmonicColoring(pitchclass, "fifths");
+        } else if (color_palette === "meaningful_thirds") {
+            return cyclicHarmonicColoring(pitchclass, "thirds");
+        } else {
+            return cyclicHarmonicColoring(pitchclass, "fifthsFolded");
+        }
+    }
 
     // integer value for the pitch, 0-11, where C=0, C#=1, D=2, etc. to B=11
     let color_mapping = {
@@ -267,4 +277,64 @@ export function getPitchClassColor(pitchclass, color_palette = "black_and_white"
         },
     };
     return color_mapping[color_palette][pitchclass];
+}
+
+const bToSharpMap = {
+    "Db": "C#",
+    "Eb": "D#",
+    "Gb": "F#",
+    "Ab": "G#",
+    "Bb": "A#",
+}
+const pitchclassArray = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+const circleOfFifths = ["C", "G", "D", "A", "E", "B", "F#", "C#", "G#", "D#", "A#", "F"]
+const circleOfThirds = [0, 6, 1, 7, 2, 8, 3, 9, 4, 10, 5, 11].map(i => circleOfFifths[i])
+const circleOfFFolded = [0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11].map(i => circleOfFifths[i])
+// takes pitchclass 0:C; 1:Cis...
+// or directly Names C, C#, D, D#, E, F, F#, G, G#, A, A#, B
+
+
+// normal coloring only based on fifths, triads, fifth folded
+// modes: fifths, triads, fifthsFolded
+export function cyclicHarmonicColoring(value, mode = "fifths") {
+    let pitch;
+
+    // convert number → pitch name
+    if (typeof value === "number") {
+        pitch = pitchclassArray[value % 12];
+    }
+    // handle string
+    else if (typeof value === "string" || value instanceof String) {
+        pitch = value;
+
+        // convert flats to sharps
+        if (pitch.includes("b") && bToSharpMap[pitch]) {
+            pitch = bToSharpMap[pitch];
+        }
+    }
+
+    let t = 0;
+
+    if (mode === "fifths") {
+
+        const index = circleOfFifths.indexOf(pitch);
+        t = index / 12;
+
+    }
+    else if (mode === "thirds") {
+
+        const index = circleOfThirds.indexOf(pitch);
+        t = index / 12;
+
+    }
+    else if (mode === "fifthsFolded") {
+
+        const index = circleOfFFolded.indexOf(pitch);
+        t = index / 12;
+        // stretch to 4 rotations, then wrap
+
+    }
+
+    // return color
+    return d3.interpolateSinebow(t);
 }

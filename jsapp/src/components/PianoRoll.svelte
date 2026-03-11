@@ -106,7 +106,7 @@
                         viewbox_attributes.split(" ")[2]}
                     y2={-1 * i + 0.5}
                     style="stroke-width:0.9;opacity:15%"
-                    stroke={getPitchClassColor(i % 12, "black_and_white")}
+                    stroke={getPitchClassColor(i % 12, "meaingful")}
                 />
             {/each}
 

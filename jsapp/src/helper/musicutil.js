@@ -6,7 +6,9 @@ let magentaPlayer = null;
 
 let playTimeout = null
 
-export function playHarmonization(row) {
+const instrument = 2
+
+export async function playHarmonization(row) {
     const data = row.v
     const index = row.i
     //console.log(music.playing_index, index)
@@ -22,8 +24,9 @@ export function playHarmonization(row) {
         if (magentaPlayer) {
             magentaPlayer.stop();
         } else {
-            magentaPlayer = new mm.SoundFontPlayer("https://storage.googleapis.com/magentadata/js/soundfonts/salamander")
-            // magentaPlayer = new mm.SoundFontPlayer("https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus")
+            //magentaPlayer = new mm.SoundFontPlayer("https://storage.googleapis.com/magentadata/js/soundfonts/salamander")
+            magentaPlayer = new mm.SoundFontPlayer("https://storage.googleapis.com/magentadata/js/soundfonts/sgm_plus")
+            await magentaPlayer.loadAllSamples(instrument);
         }
 
         music.playing_index = index
@@ -36,6 +39,7 @@ export function playHarmonization(row) {
             totalLength: Math.max(...data.midiplayback.map(v => v.endTime)),
             tempos: [{ qpm: 120 }],
         }
+        changeInstrument(seq, instrument);
         magentaPlayer.start(seq)
 
         playTimeout = setTimeout(() => {
@@ -58,4 +62,12 @@ export function highlightPlayingRow(index) {
 
     const row = document.querySelector(`.le-tr[data-i="${index}"]`);
     if (row) row.classList.add("playing");
+}
+
+
+function changeInstrument(seq, program) {
+    seq.notes.forEach(n => {
+        n.program = program;
+        n.instrument = 0;
+    });
 }

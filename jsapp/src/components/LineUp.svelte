@@ -571,7 +571,6 @@
             });
 
             // Set initial value
-            console.log(row, music.harmonizations[row]?.key);
             select.value = music.harmonizations[row]?.key || "";
 
             // Listen to changes
