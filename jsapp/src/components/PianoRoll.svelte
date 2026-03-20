@@ -50,7 +50,7 @@
 
     let coloring = $derived.by(() => {
         let colors = [];
-        if ($selectedIndex !== -1) {
+        if ($selectedIndex !== -1 && false) {
             const colorPalet = get_color_for_metric(
                 "CT_class_prog",
                 process_harmonizations_for_visualization([
@@ -64,7 +64,12 @@
             return colors;
         } else {
             for (let i = 0; i < number_of_notes; ++i) {
-                colors.push("#666");
+                colors.push(
+                    getPitchClassColor(
+                        notes["note_pitch_classes"][i],
+                        "meaningful_fifths",
+                    ),
+                );
             }
         }
 
@@ -78,6 +83,8 @@
             return notes["note_pitches"].length;
         }
     });
+
+    let showCircleOfFifths = $state(false);
 </script>
 
 <div>
@@ -106,7 +113,7 @@
                         viewbox_attributes.split(" ")[2]}
                     y2={-1 * i + 0.5}
                     style="stroke-width:0.9;opacity:15%"
-                    stroke={getPitchClassColor(i % 12, "meaingful")}
+                    stroke={getPitchClassColor(i % 12, "black_and_white")}
                 />
             {/each}
 
@@ -121,6 +128,7 @@
                 />
             {/each}
         </svg>
+        <!-- Overlay Toggle Button (oben rechts) -->
     {/if}
 </div>
 

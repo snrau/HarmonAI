@@ -6,6 +6,33 @@ import {
 import * as d3 from "d3";
 
 
+const phase12 = [
+    "#3b4cc0",
+    "#5a78d6",
+    "#6fa6e8",
+    "#7fcdbb",
+    "#90d743",
+    "#c7e11e",
+    "#f1e51d",
+    "#fdb42f",
+    "#f8765c",
+    "#e84a8a",
+    "#b536b2",
+    "#6a3d9a"
+];
+
+const phaseInterpolate = d3.interpolateRgbBasis([
+    "#3b4cc0",
+    "#6fa6e8",
+    "#7fcdbb",
+    "#c7e11e",
+    "#fdb42f",
+    "#f8765c",
+    "#b536b2",
+    "#3b4cc0" // wichtig: zyklisch schließen!
+]);
+
+
 export function get_color_for_metric(metric, notes_harmonization, number_of_smallest_units_in_piece) {
     let colors = [];
     if (metric === "pitch_class_melody") {
@@ -180,8 +207,10 @@ export function getPitchClassColor(pitchclass, color_palette = "meaningful_fifth
             return cyclicHarmonicColoring(pitchclass, "fifths");
         } else if (color_palette === "meaningful_thirds") {
             return cyclicHarmonicColoring(pitchclass, "thirds");
-        } else {
+        } else if (color_palette === "meaningful_folded") {
             return cyclicHarmonicColoring(pitchclass, "fifthsFolded");
+        } else {
+            return cyclicHarmonicColoring(pitchclass, "fifthsFoldedOther");
         }
     }
 
@@ -290,6 +319,7 @@ const pitchclassArray = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "
 const circleOfFifths = ["C", "G", "D", "A", "E", "B", "F#", "C#", "G#", "D#", "A#", "F"]
 const circleOfThirds = [0, 6, 1, 7, 2, 8, 3, 9, 4, 10, 5, 11].map(i => circleOfFifths[i])
 const circleOfFFolded = [0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11].map(i => circleOfFifths[i])
+const circleDiffFolded = [0, 4, 1, 5, 2, 6, 3, 7, 9, 11, 8, 10].map(i => circleOfFifths[i])
 // takes pitchclass 0:C; 1:Cis...
 // or directly Names C, C#, D, D#, E, F, F#, G, G#, A, A#, B
 
@@ -298,6 +328,8 @@ const circleOfFFolded = [0, 3, 6, 9, 1, 4, 7, 10, 2, 5, 8, 11].map(i => circleOf
 // modes: fifths, triads, fifthsFolded
 export function cyclicHarmonicColoring(value, mode = "fifths") {
     let pitch;
+
+
 
     // convert number → pitch name
     if (typeof value === "number") {
@@ -334,7 +366,16 @@ export function cyclicHarmonicColoring(value, mode = "fifths") {
         // stretch to 4 rotations, then wrap
 
     }
+    else if (mode === "fifthsFoldedOther") {
+
+        const index = circleDiffFolded.indexOf(pitch);
+        t = index / 12;
+        // stretch to 4 rotations, then wrap
+
+    }
 
     // return color
-    return d3.interpolateSinebow(t);
+    return phaseInterpolate(t)
+    //return phase12[Math.round(t * 12) % 12]
+    //return d3.interpolateSinebow(t);
 }

@@ -5,6 +5,7 @@
     import Harmonic_Leadsheet from "./components/Harmonic_Leadsheet.svelte";
     import PianoRoll from "./components/PianoRoll.svelte";
     import LeadsheetAddition from "./components/LeadsheetAddition.svelte";
+    import CircleOfFifths from "./components/CircleOfFifths.svelte";
 
     //     viewbox: "0 -60 16 20"
 
@@ -53,6 +54,10 @@
                 }}
             />
         </div>
+        <div id="circle-of-fifths-container">
+            <CircleOfFifths />
+        </div>
+
         <div id="buttons-container">
             <ButtonMenu />
         </div>
@@ -99,7 +104,7 @@
         height: 99%;
         width: 99%;
         display: grid;
-        grid-template-columns: 1fr 440px 440px;
+        grid-template-columns: 1fr 440px 70px 370px;
         grid-template-rows: 18% 31% 50%;
         grid-gap: 3px;
         overflow: hidden;
@@ -113,17 +118,21 @@
 
     #buttons-container {
         border: black solid 2px;
+        grid-column-start: 4;
+        grid-column-end: 5;
+        display: grid;
+        grid-template-columns: auto auto;
+        overflow: auto;
+    }
+    #circle-of-fifths-container {
         grid-column-start: 3;
         grid-column-end: 4;
-        display: grid;
-        grid-auto-columns: auto auto;
-        overflow: auto;
     }
 
     #lineup-container {
         border: black solid 2px;
         grid-column-start: 1;
-        grid-column-end: 4;
+        grid-column-end: 5;
     }
 
     #selected-harmonizations-container {
@@ -140,7 +149,7 @@
 
     .highlighted-harmonization-container {
         grid-column-start: 3;
-        grid-column-end: 4;
+        grid-column-end: 5;
         overflow: hidden;
     }
 

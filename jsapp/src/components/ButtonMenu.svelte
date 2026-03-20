@@ -34,7 +34,7 @@
     class="button_class"
     onclick={getOtherExampleMelody}
 >
-    Get other example melody
+    Get example melody 2
 </button>
 <button
     id="btn-generateHarmonizationsWithAutoHarmonizer"
@@ -43,13 +43,12 @@
 >
     Generate Harmonizations with AI
 </button>
-
 <button
     id="btn-getExistingHarmonizations"
     class="button_class"
     onclick={getExistingHarmonizations}
 >
-    Get Existing Harmonizations
+    Get Existing Har
 </button>
 
 <button
@@ -57,7 +56,7 @@
     class="button_class"
     onclick={getExampleHarmonizations}
 >
-    Get Example Harmonizations
+    Get Example Har2
 </button>
 
 <button
@@ -68,8 +67,6 @@
     Save selected harmonization(s)
 </button>
 
-<div id="messages_div"></div>
-
 <style>
     #btn-generateHarmonizationsWithAutoHarmonizer,
     #btn-getExistingHarmonizations,
@@ -79,14 +76,5 @@
 
     button {
         background-color: #fff;
-    }
-
-    #messages_div {
-        position: absolute;
-        top: 0;
-        left: 0;
-        background-color: white;
-        opacity: 0.6;
-        color: black;
     }
 </style>

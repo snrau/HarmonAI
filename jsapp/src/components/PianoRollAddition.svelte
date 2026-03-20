@@ -197,7 +197,7 @@
                         viewbox_attributes.split(" ")[2]}
                     y2={-1 * i + 0.5}
                     style="stroke-width:0.9;opacity:15%"
-                    stroke={getPitchClassColor(i % 12, "meaningful_fifths")}
+                    stroke={getPitchClassColor(i % 12, "black_and_white")}
                 />
             {/each}
 
@@ -208,7 +208,10 @@
                     y={-1 * notes_harmonization["note_pitches_midi"][i]}
                     width={notes_harmonization["note_durations"][i]}
                     height={1}
-                    fill={"#666"}
+                    fill={getPitchClassColor(
+                        notes_harmonization["note_pitches_midi"][i] % 12,
+                        "meaningful_fifths",
+                    )}
                     //stroke={coloring[i]}
                     stroke-width={0.15}
                     stroke-opacity="1"
