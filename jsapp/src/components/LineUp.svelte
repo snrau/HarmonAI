@@ -15,6 +15,10 @@
     import * as d3 from "d3";
     import "../../node_modules/lineupjs/build/LineUpJS.css";
     import { getSingleRowMetrics } from "../helper/servercomms.js";
+    import {
+        cyclicHarmonicColoring,
+        cyclicKeyMode,
+    } from "../helper/coloring.js";
 
     let container;
     //let container2;
@@ -24,44 +28,54 @@
     let observer;
 
     const KEYS = [
-        "C major",
-        "a minor",
+        { label: "C major", name: "C major", color: cyclicKeyMode(0) },
+        { label: "a minor", name: "a minor", color: cyclicKeyMode(0, false) },
 
-        "G major",
-        "e minor",
+        { label: "G major", name: "G major", color: cyclicKeyMode(7) },
+        { label: "e minor", name: "e minor", color: cyclicKeyMode(7, false) },
 
-        "D major",
-        "b minor",
+        { label: "D major", name: "D major", color: cyclicKeyMode(2) },
+        { label: "b minor", name: "b minor", color: cyclicKeyMode(2, false) },
 
-        "A major",
-        "f# minor",
+        { label: "A major", name: "A major", color: cyclicKeyMode(9) },
+        { label: "f# minor", name: "f# minor", color: cyclicKeyMode(9, false) },
 
-        "E major",
-        "c# minor",
+        { label: "E major", name: "E major", color: cyclicKeyMode(4) },
+        { label: "c# minor", name: "c# minor", color: cyclicKeyMode(4, false) },
 
-        "B major",
-        "g# minor",
+        { label: "B major", name: "B major", color: cyclicKeyMode(11) },
+        {
+            label: "g# minor",
+            name: "g# minor",
+            color: cyclicKeyMode(11, false),
+        },
 
-        "F# major",
-        "G- major",
-        "d# minor",
-        "e- minor",
+        { label: "F# major", name: "F# major", color: cyclicKeyMode(6) },
+        { label: "d# minor", name: "d# minor", color: cyclicKeyMode(6, false) },
+        { label: "G- major", name: "G- major", color: cyclicKeyMode(6) },
+        { label: "e- minor", name: "e- minor", color: cyclicKeyMode(6, false) },
 
-        "D- major",
-        "b- minor",
+        { label: "D- major", name: "D- major", color: cyclicKeyMode(1) },
+        { label: "b- minor", name: "b- minor", color: cyclicKeyMode(1, false) },
 
-        "A- major",
-        "f minor",
+        { label: "A- major", name: "A- major", color: cyclicKeyMode(8) },
+        { label: "f minor", name: "f minor", color: cyclicKeyMode(8, false) },
 
-        "E- major",
-        "c minor",
+        { label: "E- major", name: "E- major", color: cyclicKeyMode(3) },
+        { label: "c minor", name: "c minor", color: cyclicKeyMode(3, false) },
 
-        "B- major",
-        "g minor",
+        { label: "B- major", name: "B- major", color: cyclicKeyMode(10) },
+        { label: "g minor", name: "g minor", color: cyclicKeyMode(10, false) },
 
-        "F major",
-        "d minor",
+        { label: "F major", name: "F major", color: cyclicKeyMode(5) },
+        { label: "d minor", name: "d minor", color: cyclicKeyMode(5, false) },
     ];
+
+    const keyColorMapping = Object.fromEntries(
+        KEYS.map((k) => [k.name, k.color]),
+    );
+
+    console.log(KEYS);
 
     onMount(() => {
         observer = new MutationObserver(checkForKeyHeader);
@@ -119,6 +133,17 @@
 
         getSingleRowMetrics(idx, newKey);
 
+        const colorDiv = container.querySelector(
+            'article[data-ranking="rank0"] div[data-i="' +
+                idx +
+                '"] div[data-id="col1"] .lu-cat-color', //'section[title="Key"] .lu-spacing',
+        );
+
+        colorDiv.style.backgroundColor =
+            KEYS.find((k) => k.name === newKey)?.color || "transparent";
+
+        recolorKeyDistribution();
+
         /*
         // Update the original harmonization
         music.harmonizations[$selectedIndex].key = newKey;
@@ -162,8 +187,13 @@
 
             const binary_color = (v) => (v === 1 ? "darkcyan" : "#aaa");
 
-            const width_single_value = 60;
-            const width_progression = 250;
+            const noteColor = (v) => {
+                console.log(v);
+                return "darkblue";
+            };
+
+            const width_single_value = 40;
+            const width_progression = 200;
 
             builder
                 .column(
@@ -243,6 +273,20 @@
                     )
                         .width(width_progression)
                         .label("Chords")
+                        .categories([
+                            { name: "C", color: cyclicHarmonicColoring(0) },
+                            { name: "C#", color: cyclicHarmonicColoring(1) },
+                            { name: "D", color: cyclicHarmonicColoring(2) },
+                            { name: "D#", color: cyclicHarmonicColoring(3) },
+                            { name: "E", color: cyclicHarmonicColoring(4) },
+                            { name: "F", color: cyclicHarmonicColoring(5) },
+                            { name: "F#", color: cyclicHarmonicColoring(6) },
+                            { name: "G", color: cyclicHarmonicColoring(7) },
+                            { name: "G#", color: cyclicHarmonicColoring(8) },
+                            { name: "A", color: cyclicHarmonicColoring(9) },
+                            { name: "A#", color: cyclicHarmonicColoring(10) },
+                            { name: "B", color: cyclicHarmonicColoring(11) },
+                        ])
                         .renderer(
                             "catheatmap",
                             "catheatmap",
@@ -395,12 +439,10 @@
 
                 .column(
                     LineUpJS.buildCategoricalColumn("key")
-                        .categories(KEYS)
                         .width(width_single_value)
-                        .renderer("cattick")
+                        .categories(KEYS.map((k) => k.name))
                         .label("Key"),
                 )
-
                 .column(
                     LineUpJS.buildActionsColumn()
                         .width(width_single_value / 3)
@@ -563,7 +605,7 @@
             select.id = "key-select";
 
             // Populate options
-            KEYS.forEach((k) => {
+            KEYS.map((v) => v.name).forEach((k) => {
                 const opt = document.createElement("option");
                 opt.value = k;
                 opt.textContent = k;
@@ -579,7 +621,34 @@
             });
 
             spacingDiv.appendChild(select);
+
+            const colorDiv = container.querySelector(
+                'article[data-ranking="rank0"] div[data-i="' +
+                    row +
+                    '"] div[data-id="col1"] .lu-cat-color', //'section[title="Key"] .lu-spacing',
+            );
+
+            colorDiv.style.backgroundColor =
+                KEYS.find((k) => k.name === select.value)?.color ||
+                "transparent";
+
+            recolorKeyDistribution();
         }
+    }
+
+    function recolorKeyDistribution() {
+        const elements = container.querySelectorAll(
+            'section[title="Key"] div[data-renderer="categorical"] div.lu-histogram-bin',
+        );
+
+        elements.forEach((el) => {
+            const cat = el.getAttribute("data-cat");
+
+            const entry = KEYS.find((k) => k.name === cat);
+            if (!entry) return;
+
+            el.querySelector("div").style.background = entry.color;
+        });
     }
 
     function selectionChangedListener(selection) {

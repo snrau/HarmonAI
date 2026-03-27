@@ -37,6 +37,7 @@ export async function saveSelectedHarmonizations() {
 
 
 export async function getMetrics() {
+    console.log(music.harmonizations)
     //FIXME error handling when server response is in some way (most often either server is not running or internal server error due to bug in my code) failing + communication to user
     if (Object.keys(music.melody).length === 0) {
         alert('Without melody the metrics can not be calculated.');
@@ -55,6 +56,7 @@ export async function getMetrics() {
         });
         let music_data = await response.json();
         music.harmonizations = music_data.harmonizations;
+        console.log(music.harmonizations)
         music.meta = music_data.meta;
         //music.melody = music_data.melody; //should not be necessary since no changes to melody expected
     }

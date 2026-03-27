@@ -324,12 +324,31 @@ const circleDiffFolded = [0, 4, 1, 5, 2, 6, 3, 7, 9, 11, 8, 10].map(i => circleO
 // or directly Names C, C#, D, D#, E, F, F#, G, G#, A, A#, B
 
 
+export function cyclicKeyMode(value, major = true) {
+    let color = cyclicHarmonicColoring(value, "fifths");
+    if (!major) {
+        // make darker + slightly transparent
+        const match = color.match(/\d+/g);
+        if (!match) return color;
+
+        let [r, g, b, a = 1] = match.map(Number);
+
+        // darken (reduce brightness)
+        r *= 0.7;
+        g *= 0.7;
+        b *= 0.7;
+
+        // add opacity
+        return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+    }
+
+    return color;
+}
+
 // normal coloring only based on fifths, triads, fifth folded
 // modes: fifths, triads, fifthsFolded
 export function cyclicHarmonicColoring(value, mode = "fifths") {
     let pitch;
-
-
 
     // convert number → pitch name
     if (typeof value === "number") {
@@ -347,35 +366,38 @@ export function cyclicHarmonicColoring(value, mode = "fifths") {
 
     let t = 0;
 
+    let offset = 4; // offset to align C with red, can be adjusted for better visual alignment
+
     if (mode === "fifths") {
 
         const index = circleOfFifths.indexOf(pitch);
-        t = index / 12;
+        t = (index + offset) % 12;
 
     }
     else if (mode === "thirds") {
 
         const index = circleOfThirds.indexOf(pitch);
-        t = index / 12;
+        t = (index + offset) % 12;
 
     }
     else if (mode === "fifthsFolded") {
 
         const index = circleOfFFolded.indexOf(pitch);
-        t = index / 12;
+        t = (index + offset) % 12;
         // stretch to 4 rotations, then wrap
 
     }
     else if (mode === "fifthsFoldedOther") {
 
         const index = circleDiffFolded.indexOf(pitch);
-        t = index / 12;
+        t = (index + offset) % 12;
         // stretch to 4 rotations, then wrap
 
     }
 
+
     // return color
-    return phaseInterpolate(t)
+    return phaseInterpolate(t / 12)
     //return phase12[Math.round(t * 12) % 12]
     //return d3.interpolateSinebow(t);
 }

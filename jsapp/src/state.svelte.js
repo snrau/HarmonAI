@@ -15,7 +15,7 @@ export const selectedIndex = writable(-1);
 export const selectedKey = writable("");
 
 // should be 1/32 note duration, based on a quarter note length that is 1.
-export const smallest_duration_considered = 0.125
+export const smallest_duration_considered = 0.5//125
 
 
 export function process_melody_for_visualization(melody) {
@@ -114,6 +114,7 @@ export function process_harmonizations_for_visualization(harmonizations) {
             processed_harmonization["typicality_of_chords_per_chord"] = typicality_of_chords;
             processed_harmonization["CTD per chord (chord tonal distance)"] = CTDs;
             processed_harmonization["roman_numerals_reflecting_durations"] = roman_numerals;
+            processed_harmonization['show'] = 'true'
 
             // keep all data available but implement default selection of columns that seem most useful and others the user can add manually if wanted?
             // ai model specific attributes (as e.g. rhythm density) of harmonizers added in the future could not be considered here, only if all attributes are kept and manual pre-selection of columns is done

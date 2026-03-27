@@ -13,6 +13,8 @@ def get_roman_numerals(harmonization, setKey):
     roman_numerals = []
     for chord_symbol in harmonization.getElementsByClass(harmony.ChordSymbol):
         roman_numerals.append(roman.romanNumeralFromChord(chord_symbol, tkey).figure)
+    print(harmonization, roman_numerals)
+
     return tkey, roman_numerals
 
 
@@ -146,7 +148,6 @@ typical_transitions_in_minor_keys = [
     "VI iv",
     "VI V",
     "VI III-iv",
-
     "vii i",
     "vii VII-III",
     "VII i",
