@@ -49,14 +49,18 @@ def mxl_to_dict(filename):
 
 
 def construct_harmonies_table(filenames):
-    harmonies_table = []
-    for filename in filenames:
-        harmonization_dict = mxl_to_dict(filename)
-        harmonization_dict["AI_Model"] = "AutoHarmonizer"
-        harmonization_dict["rythm_density"] = float(filename.split("_")[-1][0:-4])
-        harmonies_table.append(harmonization_dict)
+    try:
+        harmonies_table = []
+        for filename in filenames:
+            harmonization_dict = mxl_to_dict(filename)
+            harmonization_dict["AI_Model"] = "AutoHarmonizer"
+            harmonization_dict["rythm_density"] = float(filename.split("_")[-1][0:-4])
+            harmonies_table.append(harmonization_dict)
 
-    return harmonies_table
+        return harmonies_table
+    except Exception as e:
+        print("Error constructing harmonies table:", e)
+        raise
 
 
 def json_to_music21(melody_json):

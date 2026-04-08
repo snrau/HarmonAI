@@ -325,7 +325,7 @@ const circleDiffFolded = [0, 4, 1, 5, 2, 6, 3, 7, 9, 11, 8, 10].map(i => circleO
 
 
 export function cyclicKeyMode(value, major = true) {
-    let color = cyclicHarmonicColoring(value, "fifths");
+    let color = cyclicHarmonicColoring(value, "fifths", major);
     if (!major) {
         // make darker + slightly transparent
         const match = color.match(/\d+/g);
@@ -334,9 +334,10 @@ export function cyclicKeyMode(value, major = true) {
         let [r, g, b, a = 1] = match.map(Number);
 
         // darken (reduce brightness)
-        r *= 0.7;
-        g *= 0.7;
-        b *= 0.7;
+        const darkness = 0.8
+        r *= darkness;
+        g *= darkness;
+        b *= darkness;
 
         // add opacity
         return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
@@ -347,7 +348,7 @@ export function cyclicKeyMode(value, major = true) {
 
 // normal coloring only based on fifths, triads, fifth folded
 // modes: fifths, triads, fifthsFolded
-export function cyclicHarmonicColoring(value, mode = "fifths") {
+export function cyclicHarmonicColoring(value, mode = "fifths", major = true) {
     let pitch;
 
     // convert number → pitch name
@@ -395,6 +396,7 @@ export function cyclicHarmonicColoring(value, mode = "fifths") {
 
     }
 
+    t = major ? t : (t + 0.5) % 12
 
     // return color
     return phaseInterpolate(t / 12)

@@ -28,7 +28,7 @@ export async function saveSelectedHarmonizations() {
 
         const a = document.createElement("a");
         a.href = url;
-        a.download = "score.musicxml";
+        a.download = "score.zip";
         a.click();
 
         URL.revokeObjectURL(url);
@@ -106,7 +106,7 @@ export async function getHarmonizationsAutoharmonizer() {
                 method: "POST",
                 body: JSON.stringify({
                     melody: music.melody,
-                    rhythm_density_lower_bound: 0.7, // TODO let user pick these values
+                    rhythm_density_lower_bound: 0, // TODO let user pick these values
                     rhythm_density_upper_bound: 1,
                 }),
                 headers: {
@@ -118,6 +118,8 @@ export async function getHarmonizationsAutoharmonizer() {
             },
         );
         let music_data = await AI_response.json();
+
+        console.log(music_data)
         //harmonizations["harmonizations"] = music_data;
         music.harmonizations = music_data;
         // probably due to "await" the request for metrics calculation starts only when the above is received
@@ -181,6 +183,19 @@ export function getOtherExampleMelody() {
 export async function getMelody() {
     //FIXME error handling when server response is in some way failing + communication to user
     const response = await fetch('http://127.0.0.1:5000/melody');
+    music.melody = await response.json();
+    music.melody["note_pitches_midi_reflecting_durations"] = process_melody_for_visualization(music.melody);
+}
+
+export async function getUploadedMelody(event) {
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch('http://127.0.0.1:5000/melody', {
+        method: "POST",
+        body: formData
+    });
     music.melody = await response.json();
     music.melody["note_pitches_midi_reflecting_durations"] = process_melody_for_visualization(music.melody);
 }

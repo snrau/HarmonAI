@@ -44,9 +44,10 @@ export function process_harmonizations_for_visualization(harmonizations) {
             let CT_class_progression_string = [];
             let PCS_progression = [];
             let CT_class_as_numerical_value = {
-                "chord_tone": 0,
-                "proper_non_chord_tone": 0.5,
-                "non_chord_tone": 1,
+                "chord_tone": 1,
+                "scale_tone": 0.7,
+                "proposition_tone": 0.3,
+                "non_scale_tone": 0,
             }
             // encode durations as well
             // consider each pair of melody tone and corresponding chord, this is not just the number of chords or melody notes

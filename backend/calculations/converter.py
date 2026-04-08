@@ -154,7 +154,19 @@ def music21_harmonization_to_json(harmonization):
 
 
 def get_melody_from_mxl(path, filename):
-    melody_score = converter.parse(os.path.join(path, filename))
+    #melody_score = converter.parse(os.path.join(path, filename))
+
+    filepath = os.path.join(path, filename)
+    ext = filename.rsplit(".", 1)[-1].lower()
+
+    score = converter.parse(filepath)
+
+    # ✅ Handle MIDI vs MXL differences
+    if ext in ["mid", "midi"]:
+        # MIDI often has multiple parts → pick first or flatten all
+        score = score.parts[0] if score.parts else score
+
+    melody_score = score.flatten()
 
     note_pitches = []
     note_pitches_midi = []

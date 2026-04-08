@@ -63,11 +63,12 @@ def CTD(chord_sequence):
 # 1 if there are no non-chord-tones at all
 # 1 if all non-chord-tones are also proper-non-chord-tones
 # 0 if there are no chord-tones as well as no proper-non-chord-tones = only non-chord-tones
-def CTnCTR(melody_sequence, harmonization):
+def CTnCTR(melody_sequence, harmonization, key):
     number_chord_tones = 0
     number_non_chord_tones = 0
     number_proper_non_chord_tones = 0
     CT_classes = []
+    scale_pitch_classes = [p.pitchClass for p in key.pitches]
     for i in range(len(melody_sequence)):
         melody_note = melody_sequence[i]
         corresponding_chords = harmonization.getElementsByOffset(
@@ -83,24 +84,60 @@ def CTnCTR(melody_sequence, harmonization):
             CT_class["start"] = max(melody_note.offset, chord.offset)
             CT_class["end"] = min(melody_note.offset + float(str(melody_note.duration)[27:-1]),
                                   chord.offset + float(str(chord.duration)[27:-1]))
-            if melody_note.pitch.pitchClass in chord.pitchClasses:
+            
+            pitch_class = melody_note.pitch.pitchClass
+
+            # --- CHORD TONE ---
+            if pitch_class in chord.pitchClasses:
                 number_chord_tones += 1
                 CT_class["class"] = "chord_tone"
+
+            # --- NON-CHORD TONES ---
             else:
                 number_non_chord_tones += 1
-                CT_class["class"] = "non_chord_tone"
-                # iterate over all melody tones that follow the one currently examined
-                for j in range(i, len(melody_sequence)):
-                    # if examined one and following one are not the same
-                    if melody_note.pitch.pitchClass != melody_sequence[j].pitch.pitchClass:
-                        # if following one is a chord tone AND absolute of the difference of the pitchclasses of the
-                        # tones is 2 at max (= within two semitones )
-                        # proper in the sense of it is an accepted non-chord-tone because it is well selected in musical context
-                        if (melody_sequence[j].pitch.pitchClass in chord.pitchClasses and
-                                interval.Interval(melody_sequence[j], melody_note).semitones <= 2):
-                            number_proper_non_chord_tones += 1
-                            CT_class["class"] = "proper_non_chord_tone"
-                        break
+                prev_note = melody_sequence[i - 1] if i > 0 else None
+                next_note = melody_sequence[i + 1] if i < len(melody_sequence) - 1 else None
+
+                def is_step(n1, n2):
+                    return abs(interval.Interval(n1, n2).semitones) <= 2
+
+                is_proposition = False
+
+                if prev_note and next_note:
+                    step_from_prev = is_step(prev_note, melody_note)
+                    step_to_next = is_step(melody_note, next_note)
+
+                    resolves_to_chord = next_note.pitch.pitchClass in chord.pitchClasses
+
+                    # check melodic direction
+                    dir1 = interval.Interval(prev_note, melody_note).direction
+                    dir2 = interval.Interval(melody_note, next_note).direction
+
+                    # rhythmic features
+                    is_weak = melody_note.beatStrength < 0.5
+                    is_short = melody_note.duration.quarterLength <= 0.5
+
+                    # core proposition logic
+                    if step_to_next and resolves_to_chord:
+                        # must be melodically connected
+                        if step_from_prev:
+                            # passing or neighbor
+                            if is_weak or is_short:
+                                is_proposition = True
+                        else:
+                            # possible appoggiatura (leap in, step out)
+                            if not is_weak:  # strong beat
+                                is_proposition = True
+
+                if is_proposition:
+                    number_proper_non_chord_tones += 1
+                    CT_class["class"] = "proposition_tone"
+                else:
+                    # fallback classification
+                    if pitch_class in scale_pitch_classes:
+                        CT_class["class"] = "scale_tone"
+                    else:
+                        CT_class["class"] = "non_scale_tone"
             CT_classes.append(CT_class)
 
     # after counting is done:

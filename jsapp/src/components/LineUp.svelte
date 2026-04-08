@@ -75,8 +75,6 @@
         KEYS.map((k) => [k.name, k.color]),
     );
 
-    console.log(KEYS);
-
     onMount(() => {
         observer = new MutationObserver(checkForKeyHeader);
 
@@ -409,14 +407,11 @@
                         .colorMapping(
                             d3.scaleLinear(
                                 [0, 0.5, 1],
-                                ["darkblue", "darkorange", "darkred"],
+                                ["darkred", "white", "darkblue"],
                             ),
                         )
                         .htmlSummary(
-                            "blue = chord tone<br> orange = proper non chord tone (kind of accepted non chord tone)<br> red = non chord tone",
-                        )
-                        .description(
-                            "0 = chord tone; 0.5 = proper non chord tone (kind of accepted non chord tone); 1 = non chord tone",
+                            "from left = dissonant tone (red), <br>proposition, scale, chord (blue)",
                         ),
                 )
                 //.column(LineUpJS.buildCategoricalColumn("CT class progression (chord tone) (string labels)").categories(["chord_tone", "non_chord_tone", "proper_non_chord_tone"]).asArray(timestamps))

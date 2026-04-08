@@ -102,55 +102,67 @@ def watermark(score, filename, water_mark=WATER_MARK):
 
 def export_music(score, beat_data, chord_data, filename, repeat_chord=REPEAT_CHORD, outputs_path=OUTPUTS_PATH, water_mark=WATER_MARK):
 
-    # Convert to music
-    harmony_list = []
-    offset = 0.0
-    filename = os.path.basename(filename)
-    filename = '.'.join(filename.split('.')[:-1])
+    try:
+        # Convert to music
+        harmony_list = []
+        offset = 0.0
+        filename = os.path.basename(filename)
+        filename = '.'.join(filename.split('.')[:-1])
 
-    for idx, song_chord in enumerate(chord_data):
-        song_chord = [chord_types[int(cho_idx)] for cho_idx in song_chord]
-        song_beat = beat_data[idx]
-        pre_chord = None
-        
-        for t_idx, cho in enumerate(song_chord):
-            cho = cho.replace('N.C.', 'R')
-            cho = cho.replace('bpedal', '-pedal')
-            if cho != 'R' and (pre_chord != cho or (repeat_chord and t_idx!=0 and song_beat[t_idx]==4 and song_beat[t_idx-1]!=4)):
-                chord_symbol= harmony.ChordSymbol(cho)
-                chord_symbol = chord_symbol
-                chord_symbol.offset = offset
-                harmony_list.append(chord_symbol)
-            offset += 0.25
-            pre_chord = cho
+        for idx, song_chord in enumerate(chord_data):
+            song_chord = [chord_types[int(cho_idx)] for cho_idx in song_chord]
+            song_beat = beat_data[idx]
+            pre_chord = None
+            
+            for t_idx, cho in enumerate(song_chord):
+                cho = cho.replace('N.C.', 'R')
+                cho = cho.replace('bpedal', '-pedal')
+                if cho != 'R' and (pre_chord != cho or (repeat_chord and t_idx!=0 and song_beat[t_idx]==4 and song_beat[t_idx-1]!=4)):
+                    chord_symbol= harmony.ChordSymbol(cho)
+                    chord_symbol = chord_symbol
+                    chord_symbol.offset = offset
+                    harmony_list.append(chord_symbol)
+                offset += 0.25
+                pre_chord = cho
 
-    h_idx=  0
-    new_score = []
-    offset_list = []
+        h_idx=  0
+        new_score = []
+        offset_list = []
 
-    for m in score:
-        if isinstance(m, stream.Measure):
-            new_m = deepcopy(m)
-            m_list = []
-            offset_list.append(m.offset)
-            for n in new_m:
-                if not isinstance(n, harmony.ChordSymbol):
-                    if h_idx<len(harmony_list) and n.offset+m.offset>=harmony_list[h_idx].offset:
-                        harmony_list[h_idx].offset -= m.offset
-                        m_list.append(harmony_list[h_idx])
-                        h_idx += 1
-                    m_list.append(n)
+        for m in score:
+            if isinstance(m, stream.Measure):
+                new_m = deepcopy(m)
+                m_list = []
+                offset_list.append(m.offset)
+                for n in new_m:
+                    if not isinstance(n, harmony.ChordSymbol):
+                        if h_idx<len(harmony_list) and n.offset+m.offset>=harmony_list[h_idx].offset:
+                            harmony_list[h_idx].offset -= m.offset
+                            m_list.append(harmony_list[h_idx])
+                            h_idx += 1
+                        m_list.append(n)
 
-            new_m.elements = m_list
-            new_score.append(new_m)
+                new_m.elements = m_list
+                new_score.append(new_m)
 
-    # Convert to score
-    score = stream.Score(new_score)
-    for m_idx, m in enumerate(score):
-        m.offset = offset_list[m_idx]
-    if water_mark:
-        score = watermark(score, filename)
-    score.write('mxl', fp=outputs_path+'/'+filename+'.mxl')
+        # Convert to score
+        score = stream.Score(new_score)
+        for m_idx, m in enumerate(score):
+            m.offset = offset_list[m_idx]
+        if water_mark:
+            score = watermark(score, filename)
+
+        output_file = outputs_path + '/' + filename + '.mxl'
+
+        # remove file if it already exists
+        if os.path.exists(output_file):
+            os.remove(output_file)
+
+        score.write('mxl', fp=output_file)
+        print(f"Exported music file: {output_file}")
+    except Exception as e:
+        print("Error exporting music:", e)
+        raise
 
 
 if __name__ == "__main__":

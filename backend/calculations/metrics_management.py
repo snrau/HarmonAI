@@ -73,6 +73,12 @@ def calculate_metrics(score, harmonizations_json, setKey):
     for i in range(len(harmonizations_json)):
         harmonization = harmonizations[i]
 
+        # functional analysis
+        if setKey is None:
+            key, roman_numerals = get_roman_numerals(harmonization, None)
+        else:
+            key, roman_numerals = get_roman_numerals(harmonization, setKey)
+
         chord_names = []
         chord_symbols = []
         chord_durations = []
@@ -99,15 +105,11 @@ def calculate_metrics(score, harmonizations_json, setKey):
         harmonizations_json[i]["CHE"], harmonizations_json[i]["CC"] = CHE_and_CC(chord_symbols)
         harmonizations_json[i]["CTD_average"], harmonizations_json[i]["CTD_per_chord"] = CTD(chord_symbols)
 
-        harmonizations_json[i]["CTnCTR"], harmonizations_json[i]["CT_class_progression"] = CTnCTR(melody, harmonization)
+        harmonizations_json[i]["CTnCTR"], harmonizations_json[i]["CT_class_progression"] = CTnCTR(melody, harmonization, key)
         harmonizations_json[i]["PCS"], harmonizations_json[i]["PCS_progression"] = PCS(melody, harmonization)
         harmonizations_json[i]["MCTD_average"], harmonizations_json[i]["MCTD_progression"] = MCTD(melody, harmonization)
 
-        # functional analysis
-        if setKey is None:
-            key, roman_numerals = get_roman_numerals(harmonization, None)
-        else:
-            key, roman_numerals = get_roman_numerals(harmonization, setKey)
+        
         harmonizations_json[i]["key"] = str(key)
         harmonizations_json[i]["roman_numerals"] = roman_numerals
         harmonizations_json[i]["typical_chord_progression_coverage"], harmonizations_json[i][

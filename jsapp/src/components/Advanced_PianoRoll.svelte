@@ -209,15 +209,13 @@
             for (
                 let i = 0;
                 i <
-                notes_harmonization[
-                    "CT class progression (chord tone) (string labels)"
-                ].length;
+                notes_harmonization["CT class progression (chord tone)"].length;
                 ++i
             ) {
                 colors.push(
                     get_CT_class_Color(
                         notes_harmonization[
-                            "CT class progression (chord tone) (string labels)"
+                            "CT class progression (chord tone)"
                         ][i],
                     ),
                 );
@@ -273,14 +271,11 @@
     }
 
     function get_CT_class_Color(label) {
-        if (label === "chord_tone") {
-            return "darkblue";
-        } else if (label === "proper_non_chord_tone") {
-            return "darkorange";
-        } else if (label === "non_chord_tone") {
-            return "darkred";
-        }
-        return "white";
+        const scale = d3.scaleLinear(
+            [0, 0.5, 1],
+            ["darkred", "white", "darkblue"],
+        );
+        return scale(label);
     }
 
     function get_typicality_of_chords_Color(value) {
@@ -398,7 +393,7 @@
                     width={smallest_duration_considered}
                     height={viewbox_attributes.split(" ")[3]}
                     fill={coloring_background[i]}
-                    opacity="60%"
+                    opacity="35%"
                 />
             {/each}
 
@@ -434,7 +429,7 @@
                         opacity={1}
                     />
                 {/each}
-                <!-- melody notes -->
+                <!-- melody notes 
                 {#each Array(number_of_notes) as _, i}
                     <rect
                         x={music.melody["note_starting_times"][i]}
@@ -448,6 +443,7 @@
                         rx={0.2}
                     />
                 {/each}
+                -->
             {:else}
                 <!-- harmonization notes -->
                 {#each Array(number_of_notes) as _, i}
@@ -458,8 +454,6 @@
                         height={1}
                         fill={"#666#"}
                         fill-opacity="0.6"
-                        stroke={"#666#"}
-                        stroke-width={0.15}
                         stroke-opacity="1"
                         rx={0.2}
                     />

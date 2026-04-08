@@ -4,10 +4,11 @@ from flask import Flask, send_from_directory, jsonify, request
 from converter import construct_harmonies_table, provide_as_model_input
 from harmonizer import *
 
+import gc
+
 app = Flask(__name__)
 
-# Build harmonic rhythm and chord model
-model = build_model(SEGMENT_LENGTH, RNN_SIZE, NUM_LAYERS, DROPOUT, WEIGHTS_PATH, training=False)
+
 
 # put this sippet ahead of all your blueprints
 # blueprint can also be app~~
@@ -26,52 +27,60 @@ def after_request(response):
 
 @app.route("/autoharmonizer", methods=['POST'])
 def get_harmonizations():
-    melody_json = request.json["melody"]
-    rhythm_density_lower_bound = request.json["rhythm_density_lower_bound"]
-    rhythm_density_upper_bound = request.json["rhythm_density_upper_bound"]
+    try:
+        # Build harmonic rhythm and chord model
+        model = build_model(SEGMENT_LENGTH, RNN_SIZE, NUM_LAYERS, DROPOUT, WEIGHTS_PATH, training=False)
+        melody_json = request.json["melody"]
+        rhythm_density_lower_bound = request.json["rhythm_density_lower_bound"]
+        rhythm_density_upper_bound = request.json["rhythm_density_upper_bound"]
 
-    provide_as_model_input(melody_json)
+        provide_as_model_input(melody_json)
 
-    # Load data from 'inputs'
-    filenames = get_filenames(input_dir=INPUTS_PATH)
-    data_corpus = convert_files(filenames, fromDataset=False)
-    
+        # Load data from 'inputs'
+        #filenames = get_filenames(input_dir=INPUTS_PATH)
+        data_corpus = convert_files(['input_melody.mxl'], fromDataset=False)
+        
 
-    seen = set()
-    # Process each melody sequence
-    for idx in trange(len(data_corpus)):
-        melody_data = data_corpus[idx][0]
-        beat_data = data_corpus[idx][1]
-        key_data = data_corpus[idx][2]
-        score = data_corpus[idx][3]
-        filename = data_corpus[idx][4]
+        seen = set()
+        # Process each melody sequence
+        for idx in trange(len(data_corpus)):
+            melody_data = data_corpus[idx][0]
+            beat_data = data_corpus[idx][1]
+            key_data = data_corpus[idx][2]
+            score = data_corpus[idx][3]
+            filename = data_corpus[idx][4]
 
-        densities = (
-        list(range(int(rhythm_density_lower_bound * 100), int(rhythm_density_upper_bound * 100) + 1, 1))
-        + list(range(0, int(rhythm_density_lower_bound * 100) + 1, 5))
-    )
-
-        # values for rhythm_density can be between 0 and 1
-        for density in densities:
-            rythm_density = density / 100
-
-            chord_data = generate_chord(
-                model, melody_data, beat_data, key_data, rhythm_gamma=rythm_density
+            densities = (
+                list(range(0, int(rhythm_density_lower_bound * 100) + 1, 5)) + list(range(int(rhythm_density_lower_bound * 100), int(rhythm_density_upper_bound * 100) + 1, 1))
             )
 
-            # convert to hashable representation
-            chord_key = tuple(chord_data)
+            # values for rhythm_density can be between 0 and 1
+            for density in densities:
+                rythm_density = density / 100
 
-            if chord_key in seen:
-                continue
+                chord_data = generate_chord(model, melody_data, beat_data, key_data, rhythm_gamma=rythm_density)
+                
+                # convert to hashable representation
+                chord_key = tuple(tuple(row) for row in chord_data)
 
-            seen.add(chord_key)
+                if chord_key in seen:
+                    continue
 
-            filename_extended = filename[:-4] + f"_variant_{rythm_density}.mxl"
-            export_music(score, beat_data, chord_data, filename_extended)
+                seen.add(chord_key)
 
-    return jsonify(construct_harmonies_table(get_filenames(input_dir=OUTPUTS_PATH)))
+                filename_extended = filename[:-4] + f"_variant_{rythm_density}.mxl"
+                export_music(score, beat_data, chord_data, filename_extended)
 
+        print("return")
+        del data_corpus
+        gc.collect()
+
+        response = jsonify(construct_harmonies_table(get_filenames(input_dir=OUTPUTS_PATH)))
+
+        return response
+    except Exception as e:
+        print("ERROR:", e)
+        raise
 
 @app.route("/existing_harmonizations")
 def get_existing_harmonizations():
@@ -82,4 +91,5 @@ def get_existing_harmonizations():
 if __name__ == "__main__":
     # set debug=False as well as threaded= False to circumvent some issue of keras 2.3.0 when using flask
     # without flask debug=True and threaded defaulting is running (as is done in harmonizer.py)
-    app.run(port=5555, debug=False, threaded=False)
+    app.run(port=5555, debug=False, threaded=False, use_reloader=False)
+    print("FLASK STOPPED")

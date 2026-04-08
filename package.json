@@ -8,6 +8,8 @@
     "preview": "vite preview",
     "start": "concurrently \"npm run backend\" \"npm run frontend\"",
     "backend": "concurrently \"run_backend_calc.bat\" \"run_backend_model.bat\"",
-    "frontend": "cd jsapp && npm run dev"
+    "frontend": "cd jsapp && npm run dev",
+    "calc": "run_backend_calc.bat",
+    "model": "run_backend_model.bat"
   }
 }

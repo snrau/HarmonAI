@@ -3,11 +3,16 @@ import os.path
 import flask
 from flask import Flask, send_from_directory, jsonify, request, Response
 import random
+import tempfile
+import zipfile
+import io
+import os
 
 
 from converter import json_to_music21, get_melody_from_mxl, score_to_musicxml_string
 from metrics_management import calculate_metrics, get_note_ranges
 from variations_within_chords import generate_variations_within_chords
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -26,10 +31,6 @@ def after_request(response):
     return response
 
 
-@app.route("/static_test_Data_from_code")
-def test():
-    return flask.jsonify([["label1", "label2"], [1, 2], [[1, 1, 1], [2, 2, 2]]])
-
 
 
 # Path for all the static files (compiled JS/CSS, etc.)
@@ -38,16 +39,33 @@ def home(path):
     return send_from_directory('../../jsapp/public', path)
 
 
-@app.route("/rand/")
-def hello():
-    return str(random.randint(0, 100))
-
+UPLOAD_FOLDER = "../../input/"
 
 @app.route("/melody")
 def getMelody():
-    # TODO implement better solution than "somewhere hidden in the code" hardwire local file paths...
-    melody = get_melody_from_mxl("../../input/",
-                                 "brahms_inspired_transposed_to_some_sharps.mxl")
+    filepath = None
+
+    # ✅ Case 1: file uploaded
+    if "file" in request.files:
+        file = request.files["file"]
+
+        if file.filename != "" :
+            filename = secure_filename(file.filename)
+
+            # avoid overwriting
+            filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+            file.save(filepath)
+
+    # ✅ Case 2: fallback to hardcoded file
+    if filepath is None:
+        filepath = os.path.join(
+            UPLOAD_FOLDER,
+            "brahms_inspired_transposed_to_some_sharps.mxl"
+        )
+    # ✅ Your existing logic
+    melody = get_melody_from_mxl(os.path.dirname(filepath), os.path.basename(filepath))
+
     return jsonify(melody)
 
 
@@ -58,14 +76,30 @@ def saveHarmonizations():
     music_data_json["harmonizations"] = request.json["harmonizations"]
     score = json_to_music21(music_data_json)
 
-    xml_string = score_to_musicxml_string(score)
+    #xml_string = score_to_musicxml_string(score)
 
+    # ✅ Create temp files
+    with tempfile.TemporaryDirectory() as tmpdir:
+        xml_path = os.path.join(tmpdir, "score.musicxml")
+        midi_path = os.path.join(tmpdir, "score.mid")
+
+        # ✅ Write both formats
+        score.write("musicxml", xml_path)
+        score.write("midi", midi_path)
+
+        # ✅ Create ZIP in memory
+        memory_file = io.BytesIO()
+        with zipfile.ZipFile(memory_file, "w") as zf:
+            zf.write(xml_path, "score.musicxml")
+            zf.write(midi_path, "score.mid")
+
+        memory_file.seek(0)
     #return jsonify({"status": 201})
     return Response(
-        xml_string,
-        mimetype="application/vnd.recordare.musicxml+xml",
+        memory_file,
+        mimetype="application/zip",
         headers={
-            "Content-Disposition": "attachment; filename=score.musicxml"
+            "Content-Disposition": "attachment; filename=score.zip"
         }
     )
 
@@ -79,9 +113,14 @@ def provideMetrics():
     # first convert to music21 representation
     music_data_music21 = json_to_music21(music_data_json)
 
+    harmonizations_with_variations = generate_variations_within_chords(
+        music_data_music21,
+        harmonizations_json
+    )
+
     # then hand over to a metrics calculation management script, that has access to all metric functions
     # that script saves the results in the representation? since that is possible for both...
-    harmonizations_and_metrics = calculate_metrics(music_data_music21, harmonizations_json, None)
+    harmonizations_and_metrics = calculate_metrics(music_data_music21, harmonizations_with_variations, None)
 
     # convert back to json table including all the calculated data
     # currently not needed, since all is directly put in the harmonizations_json dict
@@ -122,6 +161,8 @@ def provideVariationsWithinChords():
 
     # first convert to music21 representation
     music_data_music21 = json_to_music21(music_data_json)
+
+    
 
     # then hand over to a metrics calculation management script, that has access to all metric functions
     # that script saves the results in the representation? since that is possible for both...

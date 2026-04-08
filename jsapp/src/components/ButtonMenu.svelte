@@ -9,6 +9,7 @@
         getMelody,
         getExampleMelody,
         getOtherExampleMelody,
+        getUploadedMelody,
     } from "../helper/servercomms.js";
     import { harmonizations_for_own_melody } from "../helper/examples.js";
 
@@ -17,6 +18,8 @@
         music.harmonizations = harmonizations_for_own_melody;
         getMetrics();
     }
+    let fileInput;
+    let selectedFileName = "";
 </script>
 
 <button id="btn-getMelody" class="button_class" onclick={getMelody}>
@@ -29,13 +32,14 @@
 >
     Get example melody
 </button>
-<button
-    id="btn-getOtherExampleMelody"
-    class="button_class"
-    onclick={getOtherExampleMelody}
->
-    Get example melody 2
-</button>
+<input
+    class="hidden-input"
+    type="file"
+    accept=".mxl,.xml,.musicxml,.mid,.midi"
+    onchange={getUploadedMelody}
+    bind:this={fileInput}
+/>
+<button onclick={() => fileInput.click()}> Upload file </button>
 <button
     id="btn-generateHarmonizationsWithAutoHarmonizer"
     class="button_class"
@@ -76,5 +80,8 @@
 
     button {
         background-color: #fff;
+    }
+    .hidden-input {
+        display: none;
     }
 </style>
