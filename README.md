@@ -1,28 +1,34 @@
 # HarmonAI
-To run HarmonAI do the following steps:
+Need node.js version 18.12.1
 
-Run all the needed servers via IDE 
-(or in CLI: 
-python server.py 
-)
-(Currently 2: one for Autoharmonizer in that project folder and one in the backend folder.)
-
-Run the frontend app via IDE.
-(or via CLI:
-cd frontend_svelte/harmonAI
-npm run dev
-)
-
-Open localhost:5173 in a browser to access the app.
+Then run in a cmd:
+npm install .
+npm run frontend
 
 
 ## Servers
-Run for each AI Model that should generate harmonizations its own flask server and register the endpoint in the respective svelte component (something like GenerateHarmonizations) analogously to the one for AutoHarmonizer (localhost:5555/autoharmonizer).
-Make sure to comply to the needed data format.
+Run calculation server:
 
-Further data transformative application logic code is provided via a further flask server (e.g. localhost:5000/metrics).
+python 3.10.2 installed
+then in cmd:
+python -m venv cvenv
+cd venv\Scripts
+activate
+2x cd..
+pip install -r requirements.txt
+python servercalc.py
 
-Each additional server needs its own port.
+
+
+Run AI model server:
+python 3.7.9 installed
+then in cmd:
+python -m venv aivenv
+cd aivenv\Scripts
+activate
+2x cd..
+pip install -r requirements.txt
+python servermodel.py
 
 ## Regarding LineUpJS
 To get rid of the "No matching export in ...  for import ..." errors I removed all the mentioned imports in the node_modules files of lineupjs that were redundant imports and apparently that was a problem.
