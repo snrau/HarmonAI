@@ -113,10 +113,11 @@ def provideMetrics():
     # first convert to music21 representation
     music_data_music21 = json_to_music21(music_data_json)
 
-    harmonizations_with_variations = generate_variations_within_chords(
-        music_data_music21,
-        harmonizations_json
-    )
+    harmonizations_with_variations = harmonizations_json
+    #generate_variations_within_chords(
+    #    music_data_music21,
+    #    harmonizations_json
+    #)
 
     # then hand over to a metrics calculation management script, that has access to all metric functions
     # that script saves the results in the representation? since that is possible for both...
@@ -166,7 +167,7 @@ def provideVariationsWithinChords():
 
     # then hand over to a metrics calculation management script, that has access to all metric functions
     # that script saves the results in the representation? since that is possible for both...
-    harmonizations_with_variations_json = generate_variations_within_chords(music_data_music21, harmonizations_json)
+    harmonizations_with_variations_json = harmonizations_json #generate_variations_within_chords(music_data_music21, harmonizations_json)
 
     # convert back to json table including all the calculated data
     # currently not needed, since all is directly put in the harmonizations_json dict
