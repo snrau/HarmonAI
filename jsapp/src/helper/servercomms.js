@@ -1,13 +1,18 @@
 import { music, process_melody_for_visualization } from "../state.svelte.js";
 import { alle_meine_entchen, own_melody } from "./examples.js";
 
+
+
+const serverAddress = "http://127.0.0.1:5000"
+
+
 export async function saveSelectedHarmonizations() {
     if (music.selected_harmonizations.length === 0) {
         alert("No harmonization selected.");
     } else {
         //FIXME error handling when server response is in some way (most often either server is not running or internal server error due to bug in my code) failing + communication to user
         const response = await fetch(
-            "http://127.0.0.1:5000/save_harmonizations",
+            serverAddress + "/save_harmonizations",
             {
                 method: "POST",
                 body: JSON.stringify({
@@ -44,7 +49,7 @@ export async function getMetrics() {
     } else if (music.harmonizations.length === 0) {
         alert('Without harmonizations the metrics can not be calculated.');
     } else {
-        const response = await fetch('http://127.0.0.1:5000/metrics', {
+        const response = await fetch(serverAddress + '/metrics', {
             method: 'POST',
             body: JSON.stringify({ "harmonizations": music.harmonizations, "melody": music.melody }),
             headers: {
@@ -70,7 +75,7 @@ export async function getSingleRowMetrics(idx, key) {
     } else if (music.harmonizations.length === 0) {
         alert('Without harmonizations the metrics can not be calculated.');
     } else {
-        const response = await fetch('http://127.0.0.1:5000/singleMetrics', {
+        const response = await fetch(serverAddress + '/singleMetrics', {
             method: 'POST',
             body: JSON.stringify({ "harmonizations": [row], "melody": music.melody, "key": key }),
             headers: {
@@ -182,7 +187,7 @@ export function getOtherExampleMelody() {
 
 export async function getMelody() {
     //FIXME error handling when server response is in some way failing + communication to user
-    const response = await fetch('http://127.0.0.1:5000/melody');
+    const response = await fetch(serverAddress + '/melody');
     music.melody = await response.json();
     music.melody["note_pitches_midi_reflecting_durations"] = process_melody_for_visualization(music.melody);
 }
@@ -192,7 +197,7 @@ export async function getUploadedMelody(event) {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await fetch('http://127.0.0.1:5000/melody', {
+    const response = await fetch(serverAddress + '/melody', {
         method: "POST",
         body: formData
     });
