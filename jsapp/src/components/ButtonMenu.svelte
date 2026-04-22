@@ -72,14 +72,14 @@
 </button>
 
 <style>
-    #btn-generateHarmonizationsWithAutoHarmonizer,
-    #btn-getExistingHarmonizations,
-    #btn-getExampleHarmonizations {
-        background-color: #ddd;
+    #btn-getMelody,
+    #btn-getExampleHarmonizations,
+    #btn-getExampleMelody {
+        background-color: #ffffff;
     }
 
     button {
-        background-color: #fff;
+        background-color: #5f5f5f;
     }
     .hidden-input {
         display: none;

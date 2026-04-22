@@ -11,5 +11,8 @@
     "frontend": "cd jsapp && npm run dev",
     "calc": "run_backend_calc.bat",
     "model": "run_backend_model.bat"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.3.0"
   }
 }
