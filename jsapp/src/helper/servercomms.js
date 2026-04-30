@@ -105,6 +105,7 @@ export async function getHarmonizationsAutoharmonizer() {
     } else {
         //alert('Harmonizing...'); // blocks processing
         //fetch harmonizations from AutoHarmonizer
+        console.log("Requesting harmonizations from AutoHarmonizer with melody: ", music.melody);
         const AI_response = await fetch(
             "http://127.0.0.1:5555/autoharmonizer",
             {

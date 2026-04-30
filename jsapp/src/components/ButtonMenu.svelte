@@ -75,11 +75,11 @@
     #btn-getMelody,
     #btn-getExampleHarmonizations,
     #btn-getExampleMelody {
-        background-color: #ffffff;
+        background-color: #eee;
     }
 
     button {
-        background-color: #5f5f5f;
+        background-color: #eee;
     }
     .hidden-input {
         display: none;
