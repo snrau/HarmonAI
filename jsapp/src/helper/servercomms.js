@@ -3,7 +3,7 @@ import { alle_meine_entchen, own_melody } from "./examples.js";
 
 
 
-const serverAddressCalc = "https://calculation-server-vu33.onrender.com"//"http://127.0.0.1:5000"
+const serverAddressCalc = "http://127.0.0.1:5000"//"https://calculation-server-vu33.onrender.com"//"http://127.0.0.1:5000"
 
 
 export async function saveSelectedHarmonizations() {
