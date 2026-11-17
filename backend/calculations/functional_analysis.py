@@ -100,6 +100,8 @@ typical_functional_progressions = [
     "I IV V I",
     "IV I",
     "V I"
+    "V7 I"
+    "I IV V7 I",
 ]
 
 # list of transitions from paper Isochords by Bergstrom et al.
@@ -107,20 +109,26 @@ typical_transitions_in_major_keys = [
     "I",  # any other
     "i",  # any other
     "ii V",
+    "ii V7",
     "ii vii",
     "iii ii",
     "iii IV",
     "iii V",
+    "iii V7",
     "iii vi",
     "IV I",
     "IV ii",
     "IV V",
+    "IV V7",
     "IV vii",
     "V I",
     "V vi",
+    "V7 I",
+    "V7 vi",
     "vi ii",
     "vi IV",
     "vi V",
+    "vi V7",
     "vi iii-IV",
     "vii I"
 ]
@@ -130,22 +138,29 @@ typical_transitions_in_minor_keys = [
     "I",  # any other
     "i",  # any other
     "ii_6 V",
+    "ii_6 V7",
     "ii V",
+    "ii V7",
     "III ii",
     "III iv",
     "III VI",
     "iv i",
     "iv ii",
     "iv V",
+    "iv V7",
     "iv VII",
     "IV V",
+    "IV V7",
     "IV vii",
     "V i",
     "V VI",
+    "V7 i",
+    "V7 VI",
     "v VI",
     "VI ii",
     "VI iv",
     "VI V",
+    "VI V7",
     "VI III-iv",
     "vii i",
     "vii VII-III",

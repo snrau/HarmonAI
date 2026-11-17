@@ -11,11 +11,14 @@
         getOtherExampleMelody,
         getUploadedMelody,
     } from "../helper/servercomms.js";
-    import { harmonizations_for_own_melody } from "../helper/examples.js";
+    import {
+        harmonizations_for_own_melody,
+        harmonizations_for_vinci_melody,
+    } from "../helper/examples.js";
 
     function getExampleHarmonizations() {
         //music.harmonizations = alle_meine_entchen_harmonizations;
-        music.harmonizations = harmonizations_for_own_melody;
+        music.harmonizations = harmonizations_for_vinci_melody; //harmonizations_for_own_melody;
         getMetrics();
     }
     let fileInput;
@@ -30,7 +33,7 @@
     class="button_class"
     onclick={getExampleMelody}
 >
-    Get example melody
+    Get vinci melody
 </button>
 <input
     class="hidden-input"
@@ -60,7 +63,7 @@
     class="button_class"
     onclick={getExampleHarmonizations}
 >
-    Get Example Har2
+    Get Vinci Example
 </button>
 
 <button

@@ -1,5 +1,5 @@
 import { music, process_melody_for_visualization } from "../state.svelte.js";
-import { alle_meine_entchen, own_melody } from "./examples.js";
+import { alle_meine_entchen, own_melody, vinci_melody } from "./examples.js";
 
 
 
@@ -176,7 +176,7 @@ export async function getExistingHarmonizations() {
 
 export function getExampleMelody() {
     //music.melody = example_melody;
-    music.melody = alle_meine_entchen;
+    music.melody = vinci_melody;
     music.melody["note_pitches_midi_reflecting_durations"] = process_melody_for_visualization(music.melody);
 }
 

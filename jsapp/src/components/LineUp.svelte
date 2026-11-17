@@ -266,23 +266,21 @@
                         ),
                 )
                 .column(
-                    LineUpJS.buildCategoricalColumn(
-                        "chords_reflecting_durations",
-                    )
+                    LineUpJS.buildCategoricalColumn("chords_reflecting_color")
                         .width(width_progression)
                         .label("Chords")
                         .categories([
                             { name: "C", color: cyclicHarmonicColoring(0) },
-                            { name: "C#", color: cyclicHarmonicColoring(1) },
+                            { name: "Db", color: cyclicHarmonicColoring(1) },
                             { name: "D", color: cyclicHarmonicColoring(2) },
-                            { name: "D#", color: cyclicHarmonicColoring(3) },
+                            { name: "Eb", color: cyclicHarmonicColoring(3) },
                             { name: "E", color: cyclicHarmonicColoring(4) },
                             { name: "F", color: cyclicHarmonicColoring(5) },
-                            { name: "F#", color: cyclicHarmonicColoring(6) },
+                            { name: "Gb", color: cyclicHarmonicColoring(6) },
                             { name: "G", color: cyclicHarmonicColoring(7) },
-                            { name: "G#", color: cyclicHarmonicColoring(8) },
+                            { name: "Ab", color: cyclicHarmonicColoring(8) },
                             { name: "A", color: cyclicHarmonicColoring(9) },
-                            { name: "A#", color: cyclicHarmonicColoring(10) },
+                            { name: "Bb", color: cyclicHarmonicColoring(10) },
                             { name: "B", color: cyclicHarmonicColoring(11) },
                         ])
                         .renderer(

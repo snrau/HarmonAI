@@ -29,6 +29,29 @@ export function process_melody_for_visualization(melody) {
     return processed_melody;
 }
 
+const ROOT_CATEGORY_NAMES = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
+
+const LETTER_TO_PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
+function getChordColorCategory(chordSymbol) {
+    if (typeof chordSymbol !== "string") return null;
+
+    // Slash-Bass ignorieren: "C/G" -> "C"
+    const symbol = chordSymbol.trim().split("/")[0];
+
+    // Grundton: Buchstabe + Vorzeichen (music21: "-" = b, "#" = #; auch "b" erlaubt)
+    const match = symbol.match(/^([A-Ga-g])([#\-b]*)/);
+    if (!match) return null;
+
+    let pc = LETTER_TO_PC[match[1].toUpperCase()];
+    for (const acc of match[2]) {
+        pc += acc === "#" ? 1 : -1;
+    }
+    pc = ((pc % 12) + 12) % 12;
+
+    return ROOT_CATEGORY_NAMES[pc];
+}
+
 
 export function process_harmonizations_for_visualization(harmonizations) {
     let processed_harmonizations = [];
@@ -68,6 +91,7 @@ export function process_harmonizations_for_visualization(harmonizations) {
             //reflect chord durations as well
             // oriented on the number of chords in the respective harmonization
             let chords = [];
+            let chords_color = [];
             let chord_durations = [];
             let bass_notes_midi = [];
             let typicality_of_chords = [];
@@ -77,6 +101,7 @@ export function process_harmonizations_for_visualization(harmonizations) {
                 let number_of_needed_duplicates = harmonization["chord_durations"][i] / smallest_duration_considered;
                 for (let j = 0; j < number_of_needed_duplicates; j++) {
                     chords.push(harmonization["chord_symbols"][i]);
+                    chords_color.push(getChordColorCategory(harmonization["chord_symbols"][i]));
                     chord_durations.push(harmonization["chord_durations"][i]);
                     bass_notes_midi.push(harmonization["chords_bass_note_midi"][i]);
                     typicality_of_chords.push(harmonization["typical_chord_progression_coverage_per_chord"][i]);
@@ -110,6 +135,7 @@ export function process_harmonizations_for_visualization(harmonizations) {
                 }
             }
             processed_harmonization["chords_reflecting_durations"] = chords;
+            processed_harmonization["chords_reflecting_color"] = chords_color;
             processed_harmonization["chord_durations_reflecting_durations"] = chord_durations;
             processed_harmonization["chords_bass_note_midi_reflecting_durations"] = bass_notes_midi;
             processed_harmonization["typicality_of_chords_per_chord"] = typicality_of_chords;
